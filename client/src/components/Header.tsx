@@ -17,9 +17,11 @@ export default function Header() {
             <HelpCircle className="h-5 w-5 mr-1" />
             <span className="ml-1 hidden sm:inline">Help</span>
           </Button>
-          <Button size="sm" className="bg-primary hover:bg-blue-600 text-white">
-            <Crown className="h-5 w-5 mr-1" />
-            <span>Upgrade</span>
+          <Button size="sm" className="bg-primary hover:bg-blue-600 text-white" asChild>
+            <Link href="/pricing">
+              <Crown className="h-5 w-5 mr-1" />
+              <span>Upgrade</span>
+            </Link>
           </Button>
         </div>
       </div>

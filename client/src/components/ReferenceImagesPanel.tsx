@@ -86,75 +86,91 @@ export default function ReferenceImagesPanel({ onImageSelected, stockCategories 
   };
 
   return (
-    <div className="bg-white rounded-lg shadow-sm p-4 mb-6">
-      <h2 className="text-lg font-semibold mb-4">Reference Images</h2>
-      
-      {/* Image Uploader */}
+    <div>
+      {/* Main Image Uploader */}
       <div
         {...getRootProps()}
-        className={`border-2 border-dashed rounded-lg p-4 text-center cursor-pointer transition-colors ${
+        className={`border-2 border-dashed rounded-lg p-8 text-center cursor-pointer transition-colors mb-6 ${
           isDragActive ? 'border-primary bg-blue-50' : 'border-gray-300 hover:border-primary'
         }`}
       >
-        <Upload className="h-6 w-6 mx-auto text-gray-400 mb-2" />
-        <p className="text-sm text-gray-500">Drag & drop reference images or</p>
-        <Button variant="link" className="mt-2 text-primary font-medium text-sm">
-          Browse Files
+        <Upload className="h-12 w-12 mx-auto text-primary mb-4" />
+        <h3 className="text-lg font-semibold mb-2">Drag & Drop Your Image Here</h3>
+        <p className="text-gray-500 mb-4">Upload a reference image to transform into a YouTube thumbnail</p>
+        <Button className="mb-2">
+          <Upload className="h-4 w-4 mr-2" /> Browse Files
         </Button>
         <input {...getInputProps()} />
+        <p className="text-xs text-gray-400 mt-2">Max size: 5MB - Supported formats: JPEG, PNG, GIF</p>
       </div>
       
       {/* Stock Categories */}
-      <div className="mt-4 space-y-3">
-        <h3 className="text-sm font-medium text-gray-700">Stock Categories</h3>
+      <div className="mb-6">
+        <div className="flex justify-between items-center mb-4">
+          <h3 className="font-semibold text-gray-700">Stock Categories</h3>
+          {selectedCategory && (
+            <Button 
+              variant="ghost" 
+              size="sm"
+              className="text-primary text-sm flex items-center"
+              onClick={() => setSelectedCategory(null)}
+            >
+              <Images className="h-4 w-4 mr-1" /> View All
+            </Button>
+          )}
+        </div>
         
-        {stockCategories.map(category => (
-          <Button
-            key={category.id}
-            variant="outline"
-            className="flex items-center justify-between w-full px-3 py-2 text-sm text-left bg-gray-100 hover:bg-gray-200 rounded-md"
-            onClick={() => handleCategoryClick(category.id)}
-          >
-            <span>{category.name}</span>
-            <span className="text-gray-500">({category.imageCount})</span>
-          </Button>
-        ))}
+        <div className="grid grid-cols-2 gap-3 mb-4">
+          {stockCategories.map(category => (
+            <Button
+              key={category.id}
+              variant="outline"
+              className="flex items-center justify-between px-3 py-2 text-sm hover:bg-gray-100 h-auto"
+              onClick={() => handleCategoryClick(category.id)}
+            >
+              <span>{category.name}</span>
+              <span className="text-gray-500 text-xs ml-1">({category.imageCount})</span>
+            </Button>
+          ))}
+        </div>
       </div>
       
       {/* Reference Images Grid */}
-      {referenceImages.length > 0 && (
-        <div className="mt-5 grid grid-cols-2 gap-2">
-          {referenceImages.map((image) => (
-            <div key={image.id} className="relative group">
-              <img
-                src={image.url}
-                alt={image.alt}
-                className="w-full h-auto rounded-md object-cover aspect-square cursor-pointer hover:opacity-80 transition"
-                onClick={() => onImageSelected(image.url)}
-              />
-              <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-40 transition-all flex items-center justify-center opacity-0 group-hover:opacity-100">
-                <Button 
-                  size="icon" 
-                  variant="secondary" 
-                  className="h-8 w-8 rounded-full"
+      {referenceImages.length > 0 ? (
+        <div>
+          <h3 className="font-semibold text-gray-700 mb-3">Choose a Template</h3>
+          <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+            {referenceImages.map((image) => (
+              <div key={image.id} className="relative group overflow-hidden rounded-lg">
+                <img
+                  src={image.url}
+                  alt={image.alt || "Reference image"}
+                  className="w-full h-auto object-cover aspect-video rounded-lg cursor-pointer hover:scale-105 transition-transform duration-300"
                   onClick={() => onImageSelected(image.url)}
-                >
-                  <Plus className="h-4 w-4 text-primary" />
-                </Button>
+                />
+                <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-40 transition-all flex items-center justify-center opacity-0 group-hover:opacity-100">
+                  <Button 
+                    size="sm"
+                    variant="secondary" 
+                    className="rounded-md"
+                    onClick={() => onImageSelected(image.url)}
+                  >
+                    <Plus className="h-4 w-4 mr-1" /> Select
+                  </Button>
+                </div>
               </div>
-            </div>
-          ))}
+            ))}
+          </div>
         </div>
-      )}
-      
-      {selectedCategory && (
-        <Button 
-          variant="link" 
-          className="text-primary text-sm font-medium mt-4 flex items-center"
-          onClick={() => setSelectedCategory(null)}
-        >
-          <Images className="h-4 w-4 mr-1" /> View all reference images
-        </Button>
+      ) : (
+        // If no category is selected, show a message
+        !selectedCategory && (
+          <div className="text-center py-8 bg-gray-50 rounded-lg border border-gray-200">
+            <Images className="h-12 w-12 mx-auto text-gray-400 mb-3" />
+            <h3 className="text-lg font-medium text-gray-700 mb-1">Choose a Category</h3>
+            <p className="text-gray-500">Select a category to browse stock images</p>
+          </div>
+        )
       )}
     </div>
   );

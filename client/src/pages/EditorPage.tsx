@@ -193,51 +193,61 @@ export default function EditorPage() {
   return (
     <div className="bg-gray-50">
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
-          {/* Left sidebar */}
-          <div className="lg:col-span-3">
-            <ReferenceImagesPanel 
-              onImageSelected={handleImageSelected}
-              stockCategories={stockCategories}
-            />
-          </div>
-          
+        <div className="grid grid-cols-1 lg:grid-cols-10 gap-8">
           {/* Main editor */}
-          <div className="lg:col-span-6">
-            <ThumbnailEditor 
-              thumbnailData={currentThumbnail}
-              selectedElement={selectedElement}
-              onElementSelect={handleElementSelect}
-              onElementUpdate={handleUpdateElement}
-              onElementDelete={handleDeleteElement}
-              onAddText={handleAddTextElement}
-              onReset={handleReset}
-            />
-            
-            <div className="mt-6">
-              <PreviewSection thumbnailData={currentThumbnail} />
-            </div>
+          <div className="lg:col-span-7">
+            {!currentThumbnail.imageUrl ? (
+              <div className="bg-white rounded-lg shadow p-6 mb-6">
+                <h2 className="text-xl font-semibold mb-4">Upload or Select an Image</h2>
+                <ReferenceImagesPanel 
+                  onImageSelected={handleImageSelected}
+                  stockCategories={stockCategories}
+                />
+              </div>
+            ) : (
+              <>
+                <ThumbnailEditor 
+                  thumbnailData={currentThumbnail}
+                  selectedElement={selectedElement}
+                  onElementSelect={handleElementSelect}
+                  onElementUpdate={handleUpdateElement}
+                  onElementDelete={handleDeleteElement}
+                  onAddText={handleAddTextElement}
+                  onReset={handleReset}
+                />
+                
+                <div className="mt-6">
+                  <PreviewSection thumbnailData={currentThumbnail} />
+                </div>
+                
+                {/* Recent Thumbnails */}
+                <div className="mt-8">
+                  <RecentThumbnails thumbnails={recentThumbnails} />
+                </div>
+              </>
+            )}
           </div>
           
           {/* Right sidebar */}
           <div className="lg:col-span-3 space-y-6">
-            <EditorTools 
-              selectedElement={selectedElement}
-              onElementUpdate={handleUpdateElement}
-              thumbnailData={currentThumbnail}
-              onUpdateFilters={handleUpdateFilters}
-            />
-            
-            <EmojiTextStyleGenerator
-              selectedElement={selectedElement}
-              onElementUpdate={handleUpdateElement}
-              onAddEmoji={handleAddEmoji}
-            />
+            {currentThumbnail.imageUrl && (
+              <>
+                <EditorTools 
+                  selectedElement={selectedElement}
+                  onElementUpdate={handleUpdateElement}
+                  thumbnailData={currentThumbnail}
+                  onUpdateFilters={handleUpdateFilters}
+                />
+                
+                <EmojiTextStyleGenerator
+                  selectedElement={selectedElement}
+                  onElementUpdate={handleUpdateElement}
+                  onAddEmoji={handleAddEmoji}
+                />
+              </>
+            )}
           </div>
         </div>
-        
-        {/* Recent Thumbnails */}
-        <RecentThumbnails thumbnails={recentThumbnails} />
       </main>
     </div>
   );

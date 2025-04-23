@@ -1,4 +1,4 @@
-import { Link } from "wouter";
+import { Link, useLocation } from "wouter";
 import { Button } from "@/components/ui/button";
 import { 
   ArrowRight, 
@@ -8,8 +8,20 @@ import {
   Download, 
   Crop 
 } from "lucide-react";
+import { useAuth } from "@/hooks/use-auth";
 
 export default function Home() {
+  const [_, setLocation] = useLocation();
+  const { user } = useAuth();
+
+  const handleEditorClick = (e: React.MouseEvent) => {
+    e.preventDefault();
+    if (user) {
+      setLocation("/editor");
+    } else {
+      setLocation("/auth");
+    }
+  };
   return (
     <div className="bg-gray-50">
       {/* Hero Section */}
@@ -22,11 +34,13 @@ export default function Home() {
             <p className="text-xl text-gray-600 mb-8">
               Upload reference images and transform them into optimized YouTube thumbnails with our easy-to-use editor.
             </p>
-            <Link href="/editor">
-              <Button size="lg" className="bg-primary hover:bg-blue-600">
-                Start Creating <ArrowRight className="ml-2 h-5 w-5" />
-              </Button>
-            </Link>
+            <Button 
+              size="lg" 
+              className="bg-primary hover:bg-blue-600" 
+              onClick={handleEditorClick}
+            >
+              Start Creating <ArrowRight className="ml-2 h-5 w-5" />
+            </Button>
           </div>
         </div>
       </section>
@@ -75,11 +89,13 @@ export default function Home() {
             <p className="text-gray-300 mb-8">
               Start with our free editor and create professional YouTube thumbnails today.
             </p>
-            <Link href="/editor">
-              <Button size="lg" className="bg-primary hover:bg-blue-600">
-                Go to Editor <Youtube className="ml-2 h-5 w-5" />
-              </Button>
-            </Link>
+            <Button 
+              size="lg" 
+              className="bg-primary hover:bg-blue-600" 
+              onClick={handleEditorClick}
+            >
+              Go to Editor <Youtube className="ml-2 h-5 w-5" />
+            </Button>
           </div>
         </div>
       </section>

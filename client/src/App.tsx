@@ -7,6 +7,8 @@ import NotFound from "@/pages/not-found";
 import Home from "@/pages/Home";
 import EditorPage from "@/pages/EditorPage";
 import PricingPage from "@/pages/PricingPage";
+import AuthPage from "@/pages/AuthPage";
+import AccountPage from "@/pages/AccountPage";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import { AuthProvider } from "@/hooks/use-auth";
@@ -20,6 +22,8 @@ function Router() {
           <Route path="/" component={Home} />
           <Route path="/editor" component={EditorPage} />
           <Route path="/pricing" component={PricingPage} />
+          <Route path="/auth" component={AuthPage} />
+          <Route path="/account" component={AccountPage} />
           <Route component={NotFound} />
         </Switch>
       </div>

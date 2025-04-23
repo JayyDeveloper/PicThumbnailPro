@@ -37,7 +37,7 @@ const upload = multer({
   limits: {
     fileSize: 5 * 1024 * 1024, // 5MB
   },
-  fileFilter: (_req, file, cb) => {
+  fileFilter: (_req: any, file: any, cb: any) => {
     const allowedTypes = [
       "image/jpeg",
       "image/png",
@@ -285,7 +285,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       let clientSecret = null;
       if (stripe && paymentIntentId) {
-        const paymentIntent = await stripe.paymentIntents.retrieve(paymentIntentId);
+        const paymentIntent = await stripe.paymentIntents.retrieve(paymentIntentId as string);
         clientSecret = paymentIntent.client_secret;
       }
       

@@ -32,7 +32,7 @@ export default function ReferenceImagesPanel({ onImageSelected, stockCategories 
   const uploadMutation = useMutation({
     mutationFn: async (file: File) => {
       const formData = new FormData();
-      formData.append("image", file);
+      formData.append("file", file);
       
       const response = await fetch("/api/upload", {
         method: "POST",

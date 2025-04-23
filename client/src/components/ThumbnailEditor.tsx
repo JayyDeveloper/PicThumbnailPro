@@ -123,18 +123,55 @@ export default function ThumbnailEditor({
   };
 
   useEffect(() => {
+    // Variables to track the previous position for smoother movement
+    let lastX = 0;
+    let lastY = 0;
+    let animationFrameId: number | null = null;
+    
+    const updateElementPosition = (x: number, y: number) => {
+      if (!selectedElement) return;
+      
+      // Calculate the distance moved from the last position
+      const deltaX = x - lastX;
+      const deltaY = y - lastY;
+      
+      // Only update if there's significant movement (reduces jitter)
+      if (Math.abs(deltaX) > 0.01 || Math.abs(deltaY) > 0.01) {
+        lastX = x;
+        lastY = y;
+        
+        // Update element position with precise values
+        onElementUpdate({
+          ...selectedElement,
+          x: parseFloat(Math.max(0, Math.min(100, x)).toFixed(3)), // Keep 3 decimal places for smoother movement
+          y: parseFloat(Math.max(0, Math.min(100, y)).toFixed(3))
+        });
+      }
+    };
+    
     const handleMouseMove = (e: MouseEvent) => {
       if (!dragging || !selectedElement || !editorRef.current) return;
       
-      const rect = editorRef.current.getBoundingClientRect();
-      const x = ((e.clientX - rect.left - dragOffset.x) / rect.width) * 100;
-      const y = ((e.clientY - rect.top - dragOffset.y) / rect.height) * 100;
+      // Cancel any pending animation frame to avoid multiple updates
+      if (animationFrameId) {
+        cancelAnimationFrame(animationFrameId);
+      }
       
-      // Update element position
-      onElementUpdate({
-        ...selectedElement,
-        x: Math.max(0, Math.min(100, x)),
-        y: Math.max(0, Math.min(100, y))
+      // Use requestAnimationFrame for smoother updates
+      animationFrameId = requestAnimationFrame(() => {
+        const rect = editorRef.current!.getBoundingClientRect();
+        
+        // Calculate x and y with higher precision
+        const x = ((e.clientX - rect.left - dragOffset.x) / rect.width) * 100;
+        const y = ((e.clientY - rect.top - dragOffset.y) / rect.height) * 100;
+        
+        // Initialize last position values if they haven't been set
+        if (lastX === 0 && lastY === 0) {
+          lastX = x;
+          lastY = y;
+        }
+        
+        updateElementPosition(x, y);
       });
     };
     
@@ -246,11 +283,13 @@ export default function ThumbnailEditor({
         {thumbnailData.elements.map(element => (
           <div 
             key={element.id}
-            className={`absolute text-overlay cursor-move ${selectedElement?.id === element.id ? 'outline outline-blue-500' : ''}`}
+            className={`absolute text-overlay ${dragging && selectedElement?.id === element.id ? 'dragging' : ''} ${selectedElement?.id === element.id ? 'outline outline-blue-500' : ''}`}
             style={{
               left: `${element.x}%`,
               top: `${element.y}%`,
               transform: 'translate(-50%, -50%)',
+              transition: dragging ? 'none' : 'box-shadow 0.2s ease, left 0.05s ease-out, top 0.05s ease-out',
+              userSelect: 'none',
               backgroundColor: `${element.backgroundColor}${Math.round(element.backgroundOpacity * 2.55).toString(16).padStart(2, '0')}`,
               padding: '0.5rem 1rem',
               borderRadius: '0.5rem',

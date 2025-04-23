@@ -184,6 +184,18 @@ export default function ThumbnailEditor({
           return {
             filter: `brightness(${110 + brightness * 0.5}%) contrast(${120 + contrast * 0.3}%) saturate(${180 + saturation * 0.2}%) hue-rotate(20deg) blur(${blur}px)`,
           };
+        case 'Noir':
+          return {
+            filter: `grayscale(100%) contrast(${120 + contrast * 0.3}%) brightness(${90 + brightness * 0.5}%) blur(${blur}px)`,
+          };
+        case 'Vintage':
+          return {
+            filter: `sepia(40%) brightness(${90 + brightness * 0.5}%) contrast(${85 + contrast * 0.3}%) saturate(${110 + saturation * 0.3}%) hue-rotate(350deg) blur(${blur}px)`,
+          };
+        case 'Blueprint':
+          return {
+            filter: `brightness(${100 + brightness * 0.5}%) contrast(${100 + contrast * 0.3}%) grayscale(100%) invert(90%) sepia(100%) hue-rotate(180deg) blur(${blur}px)`,
+          };
         default:
           return {
             filter: `brightness(${100 + brightness}%) contrast(${100 + contrast}%) saturate(${100 + saturation}%) blur(${blur}px)`,

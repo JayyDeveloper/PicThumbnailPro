@@ -4,6 +4,7 @@ import ThumbnailEditor from "@/components/ThumbnailEditor";
 import EditorTools from "@/components/EditorTools";
 import PreviewSection from "@/components/PreviewSection";
 import RecentThumbnails from "@/components/RecentThumbnails";
+import EmojiTextStyleGenerator from "@/components/EmojiTextStyleGenerator";
 import { useToast } from "@/hooks/use-toast";
 import { useQuery } from "@tanstack/react-query";
 
@@ -57,12 +58,12 @@ export default function EditorPage() {
   const [selectedElement, setSelectedElement] = useState<TextElement | null>(null);
 
   // Fetch stock categories
-  const { data: stockCategories } = useQuery({
+  const { data: stockCategories = [] } = useQuery<any[]>({
     queryKey: ["/api/stock-categories"],
   });
 
   // Fetch recent thumbnails
-  const { data: recentThumbnails } = useQuery({
+  const { data: recentThumbnails = [] } = useQuery<any[]>({
     queryKey: ["/api/thumbnails/recent"],
   });
 
@@ -158,6 +159,36 @@ export default function EditorPage() {
       description: "Your thumbnail has been reset.",
     });
   };
+  
+  const handleAddEmoji = (emoji: string) => {
+    const newElement: TextElement = {
+      id: `emoji-${Date.now()}`,
+      content: emoji,
+      x: 50,
+      y: 50,
+      fontSize: 48, // Larger font size for emojis
+      fontFamily: "Inter",
+      fontWeight: "Regular",
+      color: "#FFFFFF",
+      backgroundColor: "transparent",
+      backgroundOpacity: 0,
+      alignment: "center",
+      bold: false,
+      italic: false,
+      underline: false,
+    };
+
+    setCurrentThumbnail({
+      ...currentThumbnail,
+      elements: [...currentThumbnail.elements, newElement],
+    });
+    setSelectedElement(newElement);
+    
+    toast({
+      title: "Emoji Added",
+      description: "The emoji has been added to your thumbnail.",
+    });
+  };
 
   return (
     <div className="bg-gray-50">
@@ -167,7 +198,7 @@ export default function EditorPage() {
           <div className="lg:col-span-3">
             <ReferenceImagesPanel 
               onImageSelected={handleImageSelected}
-              stockCategories={stockCategories || []}
+              stockCategories={stockCategories}
             />
           </div>
           
@@ -189,18 +220,24 @@ export default function EditorPage() {
           </div>
           
           {/* Right sidebar */}
-          <div className="lg:col-span-3">
+          <div className="lg:col-span-3 space-y-6">
             <EditorTools 
               selectedElement={selectedElement}
               onElementUpdate={handleUpdateElement}
               thumbnailData={currentThumbnail}
               onUpdateFilters={handleUpdateFilters}
             />
+            
+            <EmojiTextStyleGenerator
+              selectedElement={selectedElement}
+              onElementUpdate={handleUpdateElement}
+              onAddEmoji={handleAddEmoji}
+            />
           </div>
         </div>
         
         {/* Recent Thumbnails */}
-        <RecentThumbnails thumbnails={recentThumbnails || []} />
+        <RecentThumbnails thumbnails={recentThumbnails} />
       </main>
     </div>
   );

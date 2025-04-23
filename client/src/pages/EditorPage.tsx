@@ -85,7 +85,7 @@ export default function EditorPage() {
       x: 50,
       y: 50,
       fontSize: 36,
-      fontFamily: "Inter",
+      fontFamily: "Bebas Neue", // Using one of our new attention-grabbing fonts
       fontWeight: "Bold",
       color: "#FFFFFF",
       backgroundColor: "#000000",

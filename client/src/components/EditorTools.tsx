@@ -22,7 +22,18 @@ interface EditorToolsProps {
   onUpdateFilters: (filters: ThumbnailData["filters"]) => void;
 }
 
-const fontOptions = ["Inter", "Montserrat", "Roboto", "Open Sans", "Oswald"];
+const fontOptions = [
+  "Montserrat", 
+  "Roboto", 
+  "Open Sans", 
+  "Oswald", 
+  "Poppins", 
+  "Raleway", 
+  "Anton", 
+  "Bebas Neue", 
+  "Bungee", 
+  "Staatliches"
+];
 const fontWeightOptions = ["Regular", "Medium", "Bold", "Black"];
 const colorOptions = ["#FFFFFF", "#F59E0B", "#EF4444", "#3B82F6", "#10B981", "#000000"];
 
@@ -196,12 +207,16 @@ export default function EditorTools({
               onValueChange={handleFontChange}
             >
               <SelectTrigger>
-                <SelectValue placeholder="Select font" />
+                <SelectValue placeholder="Select font">
+                  {selectedElement.fontFamily && (
+                    <span style={{ fontFamily: selectedElement.fontFamily }}>{selectedElement.fontFamily}</span>
+                  )}
+                </SelectValue>
               </SelectTrigger>
               <SelectContent>
                 {fontOptions.map(font => (
                   <SelectItem key={font} value={font}>
-                    {font}
+                    <span data-font={font} style={{ fontFamily: font }}>{font}</span>
                   </SelectItem>
                 ))}
               </SelectContent>

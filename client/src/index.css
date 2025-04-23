@@ -55,5 +55,46 @@
   body {
     @apply font-sans antialiased bg-background text-foreground;
   }
+  
+  /* Font styling for the select dropdown */
+  [data-font="Montserrat"] {
+    font-family: 'Montserrat', sans-serif;
+  }
+  
+  [data-font="Roboto"] {
+    font-family: 'Roboto', sans-serif;
+  }
+  
+  [data-font="Open Sans"] {
+    font-family: 'Open Sans', sans-serif;
+  }
+  
+  [data-font="Oswald"] {
+    font-family: 'Oswald', sans-serif;
+  }
+  
+  [data-font="Poppins"] {
+    font-family: 'Poppins', sans-serif;
+  }
+  
+  [data-font="Raleway"] {
+    font-family: 'Raleway', sans-serif;
+  }
+  
+  [data-font="Anton"] {
+    font-family: 'Anton', sans-serif;
+  }
+  
+  [data-font="Bebas Neue"] {
+    font-family: 'Bebas Neue', cursive;
+  }
+  
+  [data-font="Bungee"] {
+    font-family: 'Bungee', cursive;
+  }
+  
+  [data-font="Staatliches"] {
+    font-family: 'Staatliches', cursive;
+  }
 }
 

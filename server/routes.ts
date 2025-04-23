@@ -15,6 +15,7 @@ import { ZodError } from "zod";
 import { fromZodError } from "zod-validation-error";
 import crypto from "crypto";
 import Stripe from "stripe";
+import { generateImageFromPrompt } from "./imageGenerator";
 
 // Middleware for JWT token-based authentication
 interface AuthRequest extends Request {
@@ -359,6 +360,45 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.json(images);
     } catch (error) {
       res.status(500).json({ error: "Failed to fetch reference images" });
+    }
+  });
+
+  // Generate image from prompt using Unsplash
+  app.post("/api/generate-image", async (req: AuthRequest, res) => {
+    try {      
+      // Validate prompt
+      const { prompt } = req.body;
+      if (!prompt || typeof prompt !== 'string' || prompt.trim() === '') {
+        return res.status(400).json({ error: "A valid text prompt is required" });
+      }
+      
+      // For testing, use a default user ID
+      const userId = req.user?.id || 1;
+      
+      // Generate image using Unsplash
+      const imageUrl = await generateImageFromPrompt(prompt);
+      
+      // Save reference to the database
+      const image = await storage.addReferenceImage({
+        url: imageUrl,
+        alt: `Generated from prompt: ${prompt.substring(0, 50)}${prompt.length > 50 ? '...' : ''}`,
+        userId: userId,
+        isStock: false
+      });
+      
+      res.json({
+        url: imageUrl,
+        id: image.id,
+        alt: image.alt,
+        success: true,
+        message: "Image generated successfully from prompt"
+      });
+    } catch (error: any) {
+      console.error("Error generating image:", error);
+      res.status(500).json({ 
+        error: "Failed to generate image", 
+        message: error?.message || "Unknown error" 
+      });
     }
   });
 

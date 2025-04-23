@@ -9,6 +9,7 @@ import EditorPage from "@/pages/EditorPage";
 import PricingPage from "@/pages/PricingPage";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
+import { AuthProvider } from "@/hooks/use-auth";
 
 function Router() {
   return (
@@ -32,7 +33,9 @@ function App() {
     <QueryClientProvider client={queryClient}>
       <TooltipProvider>
         <Toaster />
-        <Router />
+        <AuthProvider>
+          <Router />
+        </AuthProvider>
       </TooltipProvider>
     </QueryClientProvider>
   );

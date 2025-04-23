@@ -32,7 +32,7 @@ const TEMPLATE_COLLECTIONS = {
   popular: [
     {
       id: "popular-1",
-      name: "Dramatic Title",
+      name: "Dramatic Impact",
       category: "popular",
       imageUrl: "https://images.pexels.com/photos/1629236/pexels-photo-1629236.jpeg?auto=compress&cs=tinysrgb&w=1280&h=720&dpr=1",
       elements: [
@@ -41,12 +41,12 @@ const TEMPLATE_COLLECTIONS = {
           content: "ULTIMATE GUIDE",
           x: 50,
           y: 30,
-          fontSize: 42,
-          fontFamily: "'Montserrat', sans-serif",
+          fontSize: 52,
+          fontFamily: "'Bebas Neue', cursive",
           fontWeight: "900",
-          color: "#ffffff",
-          backgroundColor: "#ff0000",
-          backgroundOpacity: 80,
+          color: "#fc034e",
+          backgroundColor: "#000000",
+          backgroundOpacity: 70,
           italic: false,
           underline: false,
           alignment: "center" as "center",
@@ -57,8 +57,8 @@ const TEMPLATE_COLLECTIONS = {
           content: "How to Master Any Skill Fast",
           x: 50,
           y: 70,
-          fontSize: 26,
-          fontFamily: "'Open Sans', sans-serif",
+          fontSize: 28,
+          fontFamily: "'Poppins', sans-serif",
           fontWeight: "600",
           color: "#ffffff",
           backgroundColor: "#000000",
@@ -80,7 +80,7 @@ const TEMPLATE_COLLECTIONS = {
     },
     {
       id: "popular-2",
-      name: "Top 10 List",
+      name: "Gradient Top 10",
       category: "popular",
       imageUrl: "https://images.pexels.com/photos/3861969/pexels-photo-3861969.jpeg?auto=compress&cs=tinysrgb&w=1280&h=720&dpr=1",
       elements: [
@@ -89,10 +89,10 @@ const TEMPLATE_COLLECTIONS = {
           content: "TOP 10",
           x: 20,
           y: 30,
-          fontSize: 48,
-          fontFamily: "'Roboto', sans-serif",
+          fontSize: 60,
+          fontFamily: "'Anton', sans-serif",
           fontWeight: "900",
-          color: "#ffffff",
+          color: "#FFD700",
           backgroundColor: "#ff4500",
           backgroundOpacity: 90,
           italic: false,
@@ -105,8 +105,8 @@ const TEMPLATE_COLLECTIONS = {
           content: "LIFE-CHANGING HABITS",
           x: 20,
           y: 65,
-          fontSize: 28,
-          fontFamily: "'Roboto', sans-serif",
+          fontSize: 30,
+          fontFamily: "'Oswald', sans-serif",
           fontWeight: "700",
           color: "#ffffff",
           backgroundColor: "#000000",
@@ -132,17 +132,17 @@ const TEMPLATE_COLLECTIONS = {
       ],
       filters: {
         brightness: 0,
-        contrast: 10,
-        saturation: 20,
+        contrast: 15,
+        saturation: 25,
         blur: 0,
-        filterName: null
+        filterName: "Vibrant"
       }
     }
   ],
   gaming: [
     {
       id: "gaming-1",
-      name: "Game Review",
+      name: "Neon Game Review",
       category: "gaming",
       imageUrl: "https://images.pexels.com/photos/442576/pexels-photo-442576.jpeg?auto=compress&cs=tinysrgb&w=1280&h=720&dpr=1",
       elements: [
@@ -151,12 +151,12 @@ const TEMPLATE_COLLECTIONS = {
           content: "GAME REVIEW",
           x: 50,
           y: 20,
-          fontSize: 36,
-          fontFamily: "'Play', sans-serif",
+          fontSize: 45,
+          fontFamily: "'Orbitron', sans-serif",
           fontWeight: "700",
-          color: "#ffffff",
+          color: "#00ffff",
           backgroundColor: "#9147ff",
-          backgroundOpacity: 80,
+          backgroundOpacity: 75,
           italic: false,
           underline: false,
           alignment: "center" as "center",
@@ -164,19 +164,19 @@ const TEMPLATE_COLLECTIONS = {
         },
         {
           id: "template-text-2",
-          content: "Is It Worth Your Money?",
+          content: "Is It Worth Your $$$?",
           x: 50,
           y: 65,
-          fontSize: 24,
-          fontFamily: "'Play', sans-serif",
-          fontWeight: "400",
-          color: "#ffffff",
+          fontSize: 28,
+          fontFamily: "'Chakra Petch', sans-serif",
+          fontWeight: "600",
+          color: "#ff00ff",
           backgroundColor: "#000000",
           backgroundOpacity: 70,
           italic: false,
           underline: false,
           alignment: "center" as "center",
-          bold: false
+          bold: true
         }
       ],
       stickers: [
@@ -194,15 +194,15 @@ const TEMPLATE_COLLECTIONS = {
       ],
       filters: {
         brightness: 0,
-        contrast: 5,
-        saturation: 10,
+        contrast: 10,
+        saturation: 15,
         blur: 0,
         filterName: "Neon"
       }
     },
     {
       id: "gaming-2",
-      name: "Pro Tips",
+      name: "Gaming Pro Tips",
       category: "gaming",
       imageUrl: "https://images.pexels.com/photos/3165335/pexels-photo-3165335.jpeg?auto=compress&cs=tinysrgb&w=1280&h=720&dpr=1",
       elements: [
@@ -211,11 +211,11 @@ const TEMPLATE_COLLECTIONS = {
           content: "PRO TIPS",
           x: 50,
           y: 30,
-          fontSize: 44,
-          fontFamily: "'Montserrat', sans-serif",
+          fontSize: 55,
+          fontFamily: "'Permanent Marker', cursive",
           fontWeight: "800",
-          color: "#ffffff",
-          backgroundColor: "#ff4500",
+          color: "#ffff00",
+          backgroundColor: "#ff0000",
           backgroundOpacity: 85,
           italic: false,
           underline: false,
@@ -224,11 +224,11 @@ const TEMPLATE_COLLECTIONS = {
         },
         {
           id: "template-text-2",
-          content: "5 Secrets to Win Every Game",
+          content: "5 Secrets to Win EVERY Game",
           x: 50,
           y: 70,
-          fontSize: 26,
-          fontFamily: "'Montserrat', sans-serif",
+          fontSize: 28,
+          fontFamily: "'Russo One', sans-serif",
           fontWeight: "600",
           color: "#ffffff",
           backgroundColor: "#000000",
@@ -241,9 +241,9 @@ const TEMPLATE_COLLECTIONS = {
       ],
       stickers: [],
       filters: {
-        brightness: 0,
-        contrast: 15,
-        saturation: 5,
+        brightness: 5,
+        contrast: 20,
+        saturation: 15,
         blur: 0,
         filterName: "Vibrant"
       }
@@ -252,7 +252,7 @@ const TEMPLATE_COLLECTIONS = {
   tutorial: [
     {
       id: "tutorial-1",
-      name: "Step-by-Step Guide",
+      name: "Modern Guide",
       category: "tutorial",
       imageUrl: "https://images.pexels.com/photos/1181316/pexels-photo-1181316.jpeg?auto=compress&cs=tinysrgb&w=1280&h=720&dpr=1",
       elements: [
@@ -261,12 +261,12 @@ const TEMPLATE_COLLECTIONS = {
           content: "COMPLETE GUIDE",
           x: 30,
           y: 25,
-          fontSize: 36,
-          fontFamily: "'Open Sans', sans-serif",
-          fontWeight: "800",
+          fontSize: 42,
+          fontFamily: "'Raleway', sans-serif",
+          fontWeight: "900",
           color: "#ffffff",
           backgroundColor: "#4285f4",
-          backgroundOpacity: 90,
+          backgroundOpacity: 95,
           italic: false,
           underline: false,
           alignment: "left" as "left",
@@ -277,10 +277,10 @@ const TEMPLATE_COLLECTIONS = {
           content: "Master This Skill in 10 Minutes",
           x: 30,
           y: 60,
-          fontSize: 24,
-          fontFamily: "'Open Sans', sans-serif",
-          fontWeight: "600",
-          color: "#ffffff",
+          fontSize: 26,
+          fontFamily: "'Quicksand', sans-serif",
+          fontWeight: "700",
+          color: "#ebff33",
           backgroundColor: "#000000",
           backgroundOpacity: 70,
           italic: false,
@@ -305,14 +305,14 @@ const TEMPLATE_COLLECTIONS = {
       filters: {
         brightness: 5,
         contrast: 10,
-        saturation: 0,
+        saturation: 5,
         blur: 0,
         filterName: null
       }
     },
     {
       id: "tutorial-2",
-      name: "How-To Tutorial",
+      name: "Handwritten How-To",
       category: "tutorial",
       imageUrl: "https://images.pexels.com/photos/3861958/pexels-photo-3861958.jpeg?auto=compress&cs=tinysrgb&w=1280&h=720&dpr=1",
       elements: [
@@ -321,13 +321,13 @@ const TEMPLATE_COLLECTIONS = {
           content: "HOW TO",
           x: 25,
           y: 30,
-          fontSize: 44,
-          fontFamily: "'Roboto', sans-serif",
+          fontSize: 52,
+          fontFamily: "'Caveat', cursive",
           fontWeight: "900",
           color: "#ffffff",
           backgroundColor: "#ff5722",
           backgroundOpacity: 85,
-          italic: false,
+          italic: true,
           underline: false,
           alignment: "left" as "left",
           bold: true
@@ -337,13 +337,13 @@ const TEMPLATE_COLLECTIONS = {
           content: "Become an Expert in 24 Hours",
           x: 25,
           y: 60,
-          fontSize: 22,
-          fontFamily: "'Roboto', sans-serif",
+          fontSize: 30,
+          fontFamily: "'Indie Flower', cursive",
           fontWeight: "700",
           color: "#ffffff",
           backgroundColor: "#212121",
           backgroundOpacity: 75,
-          italic: false,
+          italic: true,
           underline: false,
           alignment: "left" as "left",
           bold: true
@@ -353,7 +353,7 @@ const TEMPLATE_COLLECTIONS = {
       filters: {
         brightness: 0,
         contrast: 5,
-        saturation: 0,
+        saturation: 5,
         blur: 0,
         filterName: "Normal"
       }
@@ -362,7 +362,7 @@ const TEMPLATE_COLLECTIONS = {
   reaction: [
     {
       id: "reaction-1",
-      name: "Shocked Reaction",
+      name: "Explosive Reaction",
       category: "reaction",
       imageUrl: "https://images.pexels.com/photos/3811867/pexels-photo-3811867.jpeg?auto=compress&cs=tinysrgb&w=1280&h=720&dpr=1",
       elements: [
@@ -371,10 +371,10 @@ const TEMPLATE_COLLECTIONS = {
           content: "OMG! 😱",
           x: 50,
           y: 25,
-          fontSize: 50,
-          fontFamily: "'Montserrat', sans-serif",
+          fontSize: 65,
+          fontFamily: "'Bangers', cursive",
           fontWeight: "900",
-          color: "#ffffff",
+          color: "#ffff00",
           backgroundColor: "#ff0000",
           backgroundOpacity: 90,
           italic: false,
@@ -387,8 +387,8 @@ const TEMPLATE_COLLECTIONS = {
           content: "YOU WON'T BELIEVE WHAT HAPPENED!",
           x: 50,
           y: 70,
-          fontSize: 24,
-          fontFamily: "'Montserrat', sans-serif",
+          fontSize: 28,
+          fontFamily: "'Fredoka One', cursive",
           fontWeight: "800",
           color: "#ffffff",
           backgroundColor: "#000000",
@@ -415,14 +415,14 @@ const TEMPLATE_COLLECTIONS = {
       filters: {
         brightness: 5,
         contrast: 15,
-        saturation: 10,
+        saturation: 15,
         blur: 0,
         filterName: "Vibrant"
       }
     },
     {
       id: "reaction-2",
-      name: "First Impression",
+      name: "First Look",
       category: "reaction",
       imageUrl: "https://images.pexels.com/photos/6393335/pexels-photo-6393335.jpeg?auto=compress&cs=tinysrgb&w=1280&h=720&dpr=1",
       elements: [
@@ -431,11 +431,11 @@ const TEMPLATE_COLLECTIONS = {
           content: "FIRST LOOK",
           x: 25,
           y: 20,
-          fontSize: 40,
-          fontFamily: "'Roboto', sans-serif",
+          fontSize: 48,
+          fontFamily: "'Staatliches', cursive",
           fontWeight: "900",
-          color: "#ffffff",
-          backgroundColor: "#2196f3",
+          color: "#00ffff",
+          backgroundColor: "#0b3996",
           backgroundOpacity: 85,
           italic: false,
           underline: false,
@@ -444,15 +444,15 @@ const TEMPLATE_COLLECTIONS = {
         },
         {
           id: "template-text-2",
-          content: "My Honest Reaction!",
+          content: "My Honest Reaction! 🔥",
           x: 25,
           y: 55,
-          fontSize: 26,
-          fontFamily: "'Roboto', sans-serif",
+          fontSize: 28,
+          fontFamily: "'Bungee', cursive",
           fontWeight: "700",
-          color: "#ffffff",
+          color: "#ff00ff",
           backgroundColor: "#000000",
-          backgroundOpacity: 70,
+          backgroundOpacity: 75,
           italic: false,
           underline: false,
           alignment: "left" as "left",
@@ -462,10 +462,10 @@ const TEMPLATE_COLLECTIONS = {
       stickers: [],
       filters: {
         brightness: 0,
-        contrast: 10,
-        saturation: 5,
+        contrast: 15,
+        saturation: 10,
         blur: 0,
-        filterName: "Normal"
+        filterName: "Neon"
       }
     }
   ]

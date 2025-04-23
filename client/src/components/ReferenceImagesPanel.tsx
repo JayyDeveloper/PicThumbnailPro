@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Upload, Images, Plus } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useDropzone } from "react-dropzone";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQueryClient, useQuery } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
 
 interface ReferenceImagesPanelProps {

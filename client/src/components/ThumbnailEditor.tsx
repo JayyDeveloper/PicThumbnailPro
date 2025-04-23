@@ -153,9 +153,45 @@ export default function ThumbnailEditor({
     };
   }, [dragging, dragOffset, selectedElement, onElementUpdate]);
 
-  // Generate filter styles
+  // Generate filter styles based on the selected filter name and slider values
   const getFilterStyle = () => {
-    const { brightness, contrast, saturation, blur } = thumbnailData.filters;
+    const { brightness, contrast, saturation, blur, filterName } = thumbnailData.filters;
+    
+    // Apply the named filter presets
+    if (filterName) {
+      switch (filterName) {
+        case 'Normal':
+          return {
+            filter: `brightness(${100 + brightness}%) contrast(${100 + contrast}%) saturate(${100 + saturation}%) blur(${blur}px)`,
+          };
+        case 'Muted':
+          return {
+            filter: `brightness(${100 + brightness}%) contrast(${100 + contrast}%) saturate(${50 + saturation * 0.5}%) blur(${blur}px)`,
+          };
+        case 'Vibrant':
+          return {
+            filter: `brightness(${100 + brightness}%) contrast(${100 + contrast}%) saturate(${150 + saturation * 0.5}%) blur(${blur}px)`,
+          };
+        case 'Dramatic':
+          return {
+            filter: `brightness(${110 + brightness * 0.5}%) contrast(${140 + contrast * 0.3}%) saturate(${120 + saturation * 0.3}%) blur(${blur}px)`,
+          };
+        case 'Retro':
+          return {
+            filter: `brightness(${100 + brightness}%) contrast(${100 + contrast}%) saturate(${120 + saturation * 0.3}%) sepia(60%) hue-rotate(320deg) blur(${blur}px)`,
+          };
+        case 'Neon':
+          return {
+            filter: `brightness(${110 + brightness * 0.5}%) contrast(${120 + contrast * 0.3}%) saturate(${180 + saturation * 0.2}%) hue-rotate(20deg) blur(${blur}px)`,
+          };
+        default:
+          return {
+            filter: `brightness(${100 + brightness}%) contrast(${100 + contrast}%) saturate(${100 + saturation}%) blur(${blur}px)`,
+          };
+      }
+    }
+    
+    // Default filter just using the sliders
     return {
       filter: `brightness(${100 + brightness}%) contrast(${100 + contrast}%) saturate(${100 + saturation}%) blur(${blur}px)`,
     };
@@ -163,12 +199,7 @@ export default function ThumbnailEditor({
 
   // Apply filters to thumbnail preview
   const applyFilters = (url: string) => {
-    const { filterName } = thumbnailData.filters;
-    
-    if (!filterName || filterName === 'Normal') return url;
-    
-    // This would normally call a backend API to apply filters
-    // For now we'll just return the original
+    // We're applying the filters using CSS in the style, so just return the URL
     return url;
   };
 

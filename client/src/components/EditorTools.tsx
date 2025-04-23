@@ -371,7 +371,7 @@ export default function EditorTools({
           <Label className="block text-sm font-medium text-gray-700 mb-2">
             Filters
           </Label>
-          <div className="grid grid-cols-3 gap-2">
+          <div className="grid grid-cols-3 gap-2 mb-2">
             <Button 
               variant={thumbnailData.filters.filterName === 'Normal' || !thumbnailData.filters.filterName ? "default" : "outline"} 
               className="p-2 h-auto flex flex-col items-center"
@@ -427,6 +427,124 @@ export default function EditorTools({
                 )}
               </div>
               <span className="text-xs">Vibrant</span>
+            </Button>
+          </div>
+          <div className="grid grid-cols-3 gap-2 mb-2">
+            <Button 
+              variant={thumbnailData.filters.filterName === 'Dramatic' ? "default" : "outline"} 
+              className="p-2 h-auto flex flex-col items-center"
+              onClick={() => handleFilterChange('Dramatic')}
+            >
+              <div className="w-full h-12 bg-gray-200 rounded-md mb-1 overflow-hidden">
+                {thumbnailData.imageUrl ? (
+                  <img 
+                    src={thumbnailData.imageUrl} 
+                    alt="Dramatic" 
+                    className="w-full h-full object-cover"
+                    style={{ filter: 'contrast(140%) brightness(110%) saturate(120%)' }}
+                  />
+                ) : (
+                  <div className="w-full h-full bg-gray-300" />
+                )}
+              </div>
+              <span className="text-xs">Dramatic</span>
+            </Button>
+            <Button 
+              variant={thumbnailData.filters.filterName === 'Retro' ? "default" : "outline"} 
+              className="p-2 h-auto flex flex-col items-center"
+              onClick={() => handleFilterChange('Retro')}
+            >
+              <div className="w-full h-12 bg-gray-200 rounded-md mb-1 overflow-hidden">
+                {thumbnailData.imageUrl ? (
+                  <img 
+                    src={thumbnailData.imageUrl} 
+                    alt="Retro" 
+                    className="w-full h-full object-cover"
+                    style={{ filter: 'sepia(60%) hue-rotate(320deg) saturate(120%)' }}
+                  />
+                ) : (
+                  <div className="w-full h-full bg-gray-300" />
+                )}
+              </div>
+              <span className="text-xs">Retro</span>
+            </Button>
+            <Button 
+              variant={thumbnailData.filters.filterName === 'Neon' ? "default" : "outline"} 
+              className="p-2 h-auto flex flex-col items-center"
+              onClick={() => handleFilterChange('Neon')}
+            >
+              <div className="w-full h-12 bg-gray-200 rounded-md mb-1 overflow-hidden">
+                {thumbnailData.imageUrl ? (
+                  <img 
+                    src={thumbnailData.imageUrl} 
+                    alt="Neon" 
+                    className="w-full h-full object-cover"
+                    style={{ filter: 'brightness(110%) contrast(120%) saturate(180%) hue-rotate(20deg)' }}
+                  />
+                ) : (
+                  <div className="w-full h-full bg-gray-300" />
+                )}
+              </div>
+              <span className="text-xs">Neon</span>
+            </Button>
+          </div>
+          <div className="grid grid-cols-3 gap-2">
+            <Button 
+              variant={thumbnailData.filters.filterName === 'Noir' ? "default" : "outline"} 
+              className="p-2 h-auto flex flex-col items-center"
+              onClick={() => handleFilterChange('Noir')}
+            >
+              <div className="w-full h-12 bg-gray-200 rounded-md mb-1 overflow-hidden">
+                {thumbnailData.imageUrl ? (
+                  <img 
+                    src={thumbnailData.imageUrl} 
+                    alt="Noir" 
+                    className="w-full h-full object-cover"
+                    style={{ filter: 'grayscale(100%) contrast(120%) brightness(90%)' }}
+                  />
+                ) : (
+                  <div className="w-full h-full bg-gray-300" />
+                )}
+              </div>
+              <span className="text-xs">Noir</span>
+            </Button>
+            <Button 
+              variant={thumbnailData.filters.filterName === 'Vintage' ? "default" : "outline"} 
+              className="p-2 h-auto flex flex-col items-center"
+              onClick={() => handleFilterChange('Vintage')}
+            >
+              <div className="w-full h-12 bg-gray-200 rounded-md mb-1 overflow-hidden">
+                {thumbnailData.imageUrl ? (
+                  <img 
+                    src={thumbnailData.imageUrl} 
+                    alt="Vintage" 
+                    className="w-full h-full object-cover"
+                    style={{ filter: 'sepia(40%) brightness(90%) contrast(85%) saturate(110%) hue-rotate(350deg)' }}
+                  />
+                ) : (
+                  <div className="w-full h-full bg-gray-300" />
+                )}
+              </div>
+              <span className="text-xs">Vintage</span>
+            </Button>
+            <Button 
+              variant={thumbnailData.filters.filterName === 'Blueprint' ? "default" : "outline"} 
+              className="p-2 h-auto flex flex-col items-center"
+              onClick={() => handleFilterChange('Blueprint')}
+            >
+              <div className="w-full h-12 bg-gray-200 rounded-md mb-1 overflow-hidden">
+                {thumbnailData.imageUrl ? (
+                  <img 
+                    src={thumbnailData.imageUrl} 
+                    alt="Blueprint" 
+                    className="w-full h-full object-cover"
+                    style={{ filter: 'brightness(100%) contrast(100%) grayscale(100%) invert(90%) sepia(100%) hue-rotate(180deg)' }}
+                  />
+                ) : (
+                  <div className="w-full h-full bg-gray-300" />
+                )}
+              </div>
+              <span className="text-xs">Blueprint</span>
             </Button>
           </div>
         </div>

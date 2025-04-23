@@ -5,8 +5,10 @@ import EditorTools from "@/components/EditorTools";
 import PreviewSection from "@/components/PreviewSection";
 import RecentThumbnails from "@/components/RecentThumbnails";
 import EmojiTextStyleGenerator from "@/components/EmojiTextStyleGenerator";
+import StickersPanel from "@/components/StickersPanel";
 import { useToast } from "@/hooks/use-toast";
 import { useQuery } from "@tanstack/react-query";
+import { StickerElement } from "@/hooks/useStickerEditor";
 
 export interface TextElement {
   id: string;
@@ -29,6 +31,7 @@ export interface ThumbnailData {
   id?: number;
   imageUrl: string;
   elements: TextElement[];
+  stickers: StickerElement[];
   filters: {
     brightness: number;
     contrast: number;
@@ -45,6 +48,7 @@ export default function EditorPage() {
   const [currentThumbnail, setCurrentThumbnail] = useState<ThumbnailData>({
     imageUrl: "",
     elements: [],
+    stickers: [],
     filters: {
       brightness: 0,
       contrast: 0,
@@ -56,6 +60,7 @@ export default function EditorPage() {
   });
 
   const [selectedElement, setSelectedElement] = useState<TextElement | null>(null);
+  const [selectedSticker, setSelectedSticker] = useState<StickerElement | null>(null);
 
   // Fetch stock categories
   const { data: stockCategories = [] } = useQuery<any[]>({
@@ -144,6 +149,7 @@ export default function EditorPage() {
     setCurrentThumbnail({
       imageUrl: "",
       elements: [],
+      stickers: [],
       filters: {
         brightness: 0,
         contrast: 0,
@@ -154,6 +160,7 @@ export default function EditorPage() {
       name: "Untitled Thumbnail",
     });
     setSelectedElement(null);
+    setSelectedSticker(null);
     toast({
       title: "Reset Complete",
       description: "Your thumbnail has been reset.",
@@ -183,11 +190,107 @@ export default function EditorPage() {
       elements: [...currentThumbnail.elements, newElement],
     });
     setSelectedElement(newElement);
+    setSelectedSticker(null); // Deselect any sticker when adding emoji
     
     toast({
       title: "Emoji Added",
       description: "The emoji has been added to your thumbnail.",
     });
+  };
+  
+  // Add a new sticker
+  const handleAddSticker = (imageUrl: string) => {
+    const newSticker: StickerElement = {
+      id: `sticker-${Date.now()}`,
+      imageUrl,
+      x: 50,
+      y: 50,
+      width: 150,
+      height: 150,
+      rotation: 0,
+      scale: 1,
+      zIndex: currentThumbnail.stickers.length + 1
+    };
+    
+    setCurrentThumbnail({
+      ...currentThumbnail,
+      stickers: [...currentThumbnail.stickers, newSticker]
+    });
+    setSelectedSticker(newSticker);
+    setSelectedElement(null); // Deselect any text element when adding sticker
+  };
+  
+  // Update a sticker
+  const handleUpdateSticker = (updatedSticker: StickerElement) => {
+    setCurrentThumbnail({
+      ...currentThumbnail,
+      stickers: currentThumbnail.stickers.map(sticker => 
+        sticker.id === updatedSticker.id ? updatedSticker : sticker
+      )
+    });
+    setSelectedSticker(updatedSticker);
+  };
+  
+  // Delete a sticker
+  const handleDeleteSticker = () => {
+    if (!selectedSticker) return;
+    
+    setCurrentThumbnail({
+      ...currentThumbnail,
+      stickers: currentThumbnail.stickers.filter(sticker => sticker.id !== selectedSticker.id)
+    });
+    setSelectedSticker(null);
+    
+    toast({
+      title: "Sticker Removed",
+      description: "The sticker has been removed from your thumbnail."
+    });
+  };
+  
+  // Select a sticker
+  const handleStickerSelect = (sticker: StickerElement | null) => {
+    setSelectedSticker(sticker);
+    setSelectedElement(null); // Deselect any text when selecting a sticker
+  };
+  
+  // Bring selected sticker to front
+  const handleBringToFront = () => {
+    if (!selectedSticker) return;
+    
+    const maxZIndex = Math.max(...currentThumbnail.stickers.map(s => s.zIndex), 0);
+    const updatedStickers = currentThumbnail.stickers.map(sticker => 
+      sticker.id === selectedSticker.id ? { ...sticker, zIndex: maxZIndex + 1 } : sticker
+    );
+    
+    setCurrentThumbnail({
+      ...currentThumbnail,
+      stickers: updatedStickers
+    });
+    
+    const updatedSticker = updatedStickers.find(s => s.id === selectedSticker.id);
+    if (updatedSticker) {
+      setSelectedSticker(updatedSticker);
+    }
+  };
+  
+  // Send selected sticker to back
+  const handleSendToBack = () => {
+    if (!selectedSticker) return;
+    
+    const minZIndex = Math.min(...currentThumbnail.stickers.map(s => s.zIndex), 0);
+    const updatedStickers = currentThumbnail.stickers.map(sticker => 
+      sticker.id === selectedSticker.id ? { ...sticker, zIndex: minZIndex - 1 } : sticker
+    );
+    
+    setCurrentThumbnail({
+      ...currentThumbnail,
+      stickers: updatedStickers
+    });
+    
+    const updatedSticker = updatedStickers.find(s => s.id === selectedSticker.id);
+    if (updatedSticker) {
+      setSelectedSticker(updatedSticker);
+    }
   };
 
   return (

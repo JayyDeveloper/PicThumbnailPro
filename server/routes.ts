@@ -403,7 +403,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Upload image (temporarily removed authentication for testing)
-  app.post("/api/upload", upload.single("image"), async (req: any, res) => {
+  app.post("/api/upload", upload.single("file"), async (req: any, res) => {
     try {
       if (!req.file) {
         return res.status(400).json({ error: "No file uploaded" });

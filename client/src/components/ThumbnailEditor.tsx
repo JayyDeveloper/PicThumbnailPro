@@ -384,8 +384,9 @@ export default function ThumbnailEditor({
         {thumbnailData.elements.map(element => (
           <div 
             key={element.id}
-            className={`absolute text-overlay ${dragging && selectedElement?.id === element.id ? 'dragging' : ''} ${selectedElement?.id === element.id ? 'outline outline-blue-500' : ''}`}
+            className={`relative group ${dragging && selectedElement?.id === element.id ? 'dragging' : ''} ${selectedElement?.id === element.id ? 'outline outline-blue-500' : ''}`}
             style={{
+              position: 'absolute',
               left: `${element.x}%`,
               top: `${element.y}%`,
               transform: 'translate(-50%, -50%)',
@@ -401,7 +402,14 @@ export default function ThumbnailEditor({
               e.stopPropagation();
               onElementSelect(element);
             }}
-            onMouseDown={(e) => handleMouseDown(e, element)}
+            onMouseDown={(e) => {
+              // Don't trigger drag if clicking on the delete button
+              if ((e.target as HTMLElement).closest('.delete-btn')) {
+                e.stopPropagation();
+                return;
+              }
+              handleMouseDown(e, element)
+            }}
           >
             <h3 
               style={{
@@ -415,6 +423,18 @@ export default function ThumbnailEditor({
             >
               {element.content}
             </h3>
+            
+            {/* Delete button that appears on hover */}
+            <button
+              className="delete-btn absolute -top-3 -right-3 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
+              onClick={(e) => {
+                e.stopPropagation();
+                onElementDelete(element.id);
+              }}
+              title="Delete text"
+            >
+              <Trash2 className="h-3 w-3" />
+            </button>
           </div>
         ))}
         

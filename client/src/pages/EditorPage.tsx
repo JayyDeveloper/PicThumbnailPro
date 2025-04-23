@@ -1,0 +1,207 @@
+import { useState } from "react";
+import ReferenceImagesPanel from "@/components/ReferenceImagesPanel";
+import ThumbnailEditor from "@/components/ThumbnailEditor";
+import EditorTools from "@/components/EditorTools";
+import PreviewSection from "@/components/PreviewSection";
+import RecentThumbnails from "@/components/RecentThumbnails";
+import { useToast } from "@/hooks/use-toast";
+import { useQuery } from "@tanstack/react-query";
+
+export interface TextElement {
+  id: string;
+  content: string;
+  x: number;
+  y: number;
+  fontSize: number;
+  fontFamily: string;
+  fontWeight: string;
+  color: string;
+  backgroundColor: string;
+  backgroundOpacity: number;
+  alignment: "left" | "center" | "right";
+  bold: boolean;
+  italic: boolean;
+  underline: boolean;
+}
+
+export interface ThumbnailData {
+  id?: number;
+  imageUrl: string;
+  elements: TextElement[];
+  filters: {
+    brightness: number;
+    contrast: number;
+    saturation: number;
+    blur: number;
+    filterName: string | null;
+  };
+  name: string;
+}
+
+export default function EditorPage() {
+  const { toast } = useToast();
+
+  const [currentThumbnail, setCurrentThumbnail] = useState<ThumbnailData>({
+    imageUrl: "",
+    elements: [],
+    filters: {
+      brightness: 0,
+      contrast: 0,
+      saturation: 0,
+      blur: 0,
+      filterName: null,
+    },
+    name: "Untitled Thumbnail",
+  });
+
+  const [selectedElement, setSelectedElement] = useState<TextElement | null>(null);
+
+  // Fetch stock categories
+  const { data: stockCategories } = useQuery({
+    queryKey: ["/api/stock-categories"],
+  });
+
+  // Fetch recent thumbnails
+  const { data: recentThumbnails } = useQuery({
+    queryKey: ["/api/thumbnails/recent"],
+  });
+
+  const handleImageSelected = (imageUrl: string) => {
+    setCurrentThumbnail({
+      ...currentThumbnail,
+      imageUrl,
+    });
+    toast({
+      title: "Image Selected",
+      description: "The image has been added to your thumbnail.",
+    });
+  };
+
+  const handleAddTextElement = () => {
+    const newElement: TextElement = {
+      id: `text-${Date.now()}`,
+      content: "YOUR TEXT HERE",
+      x: 50,
+      y: 50,
+      fontSize: 36,
+      fontFamily: "Inter",
+      fontWeight: "Bold",
+      color: "#FFFFFF",
+      backgroundColor: "#000000",
+      backgroundOpacity: 50,
+      alignment: "center",
+      bold: true,
+      italic: false,
+      underline: false,
+    };
+
+    setCurrentThumbnail({
+      ...currentThumbnail,
+      elements: [...currentThumbnail.elements, newElement],
+    });
+    setSelectedElement(newElement);
+  };
+
+  const handleUpdateElement = (updatedElement: TextElement) => {
+    setCurrentThumbnail({
+      ...currentThumbnail,
+      elements: currentThumbnail.elements.map(el => 
+        el.id === updatedElement.id ? updatedElement : el
+      ),
+    });
+    setSelectedElement(updatedElement);
+  };
+
+  const handleDeleteElement = (id: string) => {
+    setCurrentThumbnail({
+      ...currentThumbnail,
+      elements: currentThumbnail.elements.filter(el => el.id !== id),
+    });
+    
+    if (selectedElement && selectedElement.id === id) {
+      setSelectedElement(null);
+    }
+    
+    toast({
+      title: "Element Deleted",
+      description: "The element has been removed from your thumbnail.",
+    });
+  };
+  
+  const handleUpdateFilters = (filters: ThumbnailData["filters"]) => {
+    setCurrentThumbnail({
+      ...currentThumbnail,
+      filters,
+    });
+  };
+
+  const handleElementSelect = (element: TextElement | null) => {
+    setSelectedElement(element);
+  };
+
+  const handleReset = () => {
+    setCurrentThumbnail({
+      imageUrl: "",
+      elements: [],
+      filters: {
+        brightness: 0,
+        contrast: 0,
+        saturation: 0,
+        blur: 0,
+        filterName: null,
+      },
+      name: "Untitled Thumbnail",
+    });
+    setSelectedElement(null);
+    toast({
+      title: "Reset Complete",
+      description: "Your thumbnail has been reset.",
+    });
+  };
+
+  return (
+    <div className="bg-gray-50">
+      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
+          {/* Left sidebar */}
+          <div className="lg:col-span-3">
+            <ReferenceImagesPanel 
+              onImageSelected={handleImageSelected}
+              stockCategories={stockCategories || []}
+            />
+          </div>
+          
+          {/* Main editor */}
+          <div className="lg:col-span-6">
+            <ThumbnailEditor 
+              thumbnailData={currentThumbnail}
+              selectedElement={selectedElement}
+              onElementSelect={handleElementSelect}
+              onElementUpdate={handleUpdateElement}
+              onElementDelete={handleDeleteElement}
+              onAddText={handleAddTextElement}
+              onReset={handleReset}
+            />
+            
+            <div className="mt-6">
+              <PreviewSection thumbnailData={currentThumbnail} />
+            </div>
+          </div>
+          
+          {/* Right sidebar */}
+          <div className="lg:col-span-3">
+            <EditorTools 
+              selectedElement={selectedElement}
+              onElementUpdate={handleUpdateElement}
+              thumbnailData={currentThumbnail}
+              onUpdateFilters={handleUpdateFilters}
+            />
+          </div>
+        </div>
+        
+        {/* Recent Thumbnails */}
+        <RecentThumbnails thumbnails={recentThumbnails || []} />
+      </main>
+    </div>
+  );
+}

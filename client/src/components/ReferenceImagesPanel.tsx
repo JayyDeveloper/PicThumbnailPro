@@ -21,7 +21,7 @@ export default function ReferenceImagesPanel({ onImageSelected, stockCategories 
   const [selectedCategory, setSelectedCategory] = useState<number | null>(null);
   
   // Fetch reference images based on selected category
-  const { data: referenceImages = [] } = useQuery({
+  const { data: referenceImages = [] } = useQuery<any[]>({
     queryKey: ["/api/reference-images", selectedCategory],
     enabled: selectedCategory !== null,
   });

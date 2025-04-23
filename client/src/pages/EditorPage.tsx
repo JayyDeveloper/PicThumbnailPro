@@ -6,6 +6,7 @@ import PreviewSection from "@/components/PreviewSection";
 import RecentThumbnails from "@/components/RecentThumbnails";
 import EmojiTextStyleGenerator from "@/components/EmojiTextStyleGenerator";
 import StickersPanel from "@/components/StickersPanel";
+import TemplateLibrary, { ThumbnailTemplate } from "@/components/TemplateLibrary";
 import { useToast } from "@/hooks/use-toast";
 import { useQuery } from "@tanstack/react-query";
 import { StickerElement } from "@/hooks/useStickerEditor";
@@ -293,6 +294,26 @@ export default function EditorPage() {
     }
   };
 
+  // Handle template selection
+  const handleTemplateSelect = (template: ThumbnailTemplate) => {
+    setCurrentThumbnail({
+      ...currentThumbnail,
+      imageUrl: template.imageUrl,
+      elements: template.elements,
+      stickers: template.stickers,
+      filters: template.filters,
+      name: template.name
+    });
+    
+    setSelectedElement(null);
+    setSelectedSticker(null);
+    
+    toast({
+      title: "Template Applied",
+      description: `The "${template.name}" template has been applied.`,
+    });
+  };
+
   return (
     <div className="bg-gray-50">
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
@@ -300,13 +321,20 @@ export default function EditorPage() {
           {/* Main editor */}
           <div className="lg:col-span-7">
             {!currentThumbnail.imageUrl ? (
-              <div className="bg-white rounded-lg shadow p-6 mb-6">
-                <h2 className="text-xl font-semibold mb-4">Upload or Select an Image</h2>
-                <ReferenceImagesPanel 
-                  onImageSelected={handleImageSelected}
-                  stockCategories={stockCategories}
-                />
-              </div>
+              <>
+                <div className="bg-white rounded-lg shadow p-6 mb-6">
+                  <h2 className="text-xl font-semibold mb-4">Upload or Select an Image</h2>
+                  <ReferenceImagesPanel 
+                    onImageSelected={handleImageSelected}
+                    stockCategories={stockCategories}
+                  />
+                </div>
+                
+                <div className="bg-white rounded-lg shadow p-6">
+                  <h2 className="text-xl font-semibold mb-4">Or Choose from Template Library</h2>
+                  <TemplateLibrary onSelectTemplate={handleTemplateSelect} />
+                </div>
+              </>
             ) : (
               <>
                 <ThumbnailEditor 

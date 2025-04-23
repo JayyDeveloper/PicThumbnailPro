@@ -97,6 +97,7 @@ export default function PreviewSection({ thumbnailData }: PreviewSectionProps) {
                   height: `${sticker.height * 0.7}px`, // Scale down for preview
                   transform: `translate(-50%, -50%) rotate(${sticker.rotation}deg) scale(${sticker.scale})`,
                   zIndex: sticker.zIndex,
+                  position: 'relative', // For positioning the delete button
                 }}
               >
                 <img 

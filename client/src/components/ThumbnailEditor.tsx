@@ -10,7 +10,8 @@ import {
   RefreshCcw, 
   Save, 
   Download,
-  ImagePlus
+  ImagePlus,
+  Trash2
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { ThumbnailData, TextElement } from "@/pages/EditorPage";
@@ -331,8 +332,9 @@ export default function ThumbnailEditor({
         {thumbnailData.stickers.map(sticker => (
           <div 
             key={sticker.id}
-            className={`absolute sticker-element ${dragging && selectedSticker?.id === sticker.id ? 'dragging' : ''} ${selectedSticker?.id === sticker.id ? 'outline outline-blue-500' : ''}`}
+            className={`relative group ${dragging && selectedSticker?.id === sticker.id ? 'dragging' : ''} ${selectedSticker?.id === sticker.id ? 'outline outline-blue-500' : ''}`}
             style={{
+              position: 'absolute',
               left: `${sticker.x}%`,
               top: `${sticker.y}%`,
               width: `${sticker.width}px`,
@@ -347,7 +349,14 @@ export default function ThumbnailEditor({
               e.stopPropagation();
               onStickerSelect(sticker);
             }}
-            onMouseDown={(e) => handleStickerMouseDown(e, sticker)}
+            onMouseDown={(e) => {
+              // Don't trigger drag if clicking on the delete button
+              if ((e.target as HTMLElement).closest('.delete-btn')) {
+                e.stopPropagation();
+                return;
+              }
+              handleStickerMouseDown(e, sticker);
+            }}
           >
             <img 
               src={sticker.imageUrl} 
@@ -355,6 +364,19 @@ export default function ThumbnailEditor({
               className="w-full h-full object-contain"
               draggable="false"
             />
+            
+            {/* Delete button that appears on hover */}
+            <button
+              className="delete-btn absolute -top-3 -right-3 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
+              onClick={(e) => {
+                e.stopPropagation();
+                onStickerSelect(sticker);
+                onStickerDelete();
+              }}
+              title="Delete sticker"
+            >
+              <Trash2 className="h-3 w-3" />
+            </button>
           </div>
         ))}
         

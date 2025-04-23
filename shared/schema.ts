@@ -6,11 +6,16 @@ import { z } from "zod";
 export const users = pgTable("users", {
   id: serial("id").primaryKey(),
   username: text("username").notNull().unique(),
+  email: text("email").notNull().unique(),
   password: text("password").notNull(),
+  points: integer("points").notNull().default(1), // Start with 1 free point
+  createdAt: text("created_at").notNull().default(new Date().toISOString()),
+  stripeCustomerId: text("stripe_customer_id"),
 });
 
 export const insertUserSchema = createInsertSchema(users).pick({
   username: true,
+  email: true,
   password: true,
 });
 
@@ -79,3 +84,44 @@ export const insertThumbnailSchema = createInsertSchema(thumbnails).pick({
 
 export type InsertThumbnail = z.infer<typeof insertThumbnailSchema>;
 export type Thumbnail = typeof thumbnails.$inferSelect;
+
+// Point packages
+export const pointPackages = pgTable("point_packages", {
+  id: serial("id").primaryKey(),
+  name: text("name").notNull(),
+  points: integer("points").notNull(),
+  price: integer("price").notNull(), // in cents
+  active: boolean("active").notNull().default(true),
+});
+
+export const insertPointPackageSchema = createInsertSchema(pointPackages).pick({
+  name: true,
+  points: true,
+  price: true,
+  active: true,
+});
+
+export type InsertPointPackage = z.infer<typeof insertPointPackageSchema>;
+export type PointPackage = typeof pointPackages.$inferSelect;
+
+// Point transactions
+export const pointTransactions = pgTable("point_transactions", {
+  id: serial("id").primaryKey(),
+  userId: integer("user_id").references(() => users.id).notNull(),
+  packageId: integer("package_id").references(() => pointPackages.id),
+  points: integer("points").notNull(),
+  description: text("description").notNull(),
+  stripePaymentIntentId: text("stripe_payment_intent_id"),
+  createdAt: text("created_at").notNull().default(new Date().toISOString()),
+});
+
+export const insertPointTransactionSchema = createInsertSchema(pointTransactions).pick({
+  userId: true,
+  packageId: true,
+  points: true,
+  description: true,
+  stripePaymentIntentId: true,
+});
+
+export type InsertPointTransaction = z.infer<typeof insertPointTransactionSchema>;
+export type PointTransaction = typeof pointTransactions.$inferSelect;

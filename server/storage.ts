@@ -6,7 +6,11 @@ import {
   type ReferenceImage,
   type InsertReferenceImage,
   type Thumbnail,
-  type InsertThumbnail
+  type InsertThumbnail,
+  type PointPackage,
+  type InsertPointPackage,
+  type PointTransaction,
+  type InsertPointTransaction
 } from "@shared/schema";
 import sharp from "sharp";
 import fs from "fs";
@@ -73,7 +77,10 @@ export interface IStorage {
   // User methods
   getUser(id: number): Promise<User | undefined>;
   getUserByUsername(username: string): Promise<User | undefined>;
+  getUserByEmail(email: string): Promise<User | undefined>;
   createUser(user: InsertUser): Promise<User>;
+  updateUser(id: number, user: Partial<User>): Promise<User | undefined>;
+  updateUserPoints(id: number, pointChange: number): Promise<User | undefined>;
   
   // Stock category methods
   getStockCategories(): Promise<StockCategory[]>;
@@ -87,12 +94,24 @@ export interface IStorage {
   // Thumbnail methods
   getThumbnail(id: number): Promise<Thumbnail | undefined>;
   getRecentThumbnails(): Promise<Thumbnail[]>;
+  getUserThumbnails(userId: number): Promise<Thumbnail[]>;
   createThumbnail(thumbnail: InsertThumbnail): Promise<Thumbnail>;
   updateThumbnail(id: number, thumbnail: Partial<InsertThumbnail>): Promise<Thumbnail | undefined>;
   deleteThumbnail(id: number): Promise<boolean>;
   
   // Image processing
   exportThumbnail(imageUrl: string, elements: any[], filters: any): Promise<Buffer>;
+  
+  // Points system
+  getPointPackages(): Promise<PointPackage[]>;
+  getPointPackage(id: number): Promise<PointPackage | undefined>;
+  createPointPackage(pkg: InsertPointPackage): Promise<PointPackage>;
+  updatePointPackage(id: number, pkg: Partial<InsertPointPackage>): Promise<PointPackage | undefined>;
+  
+  // Transaction methods
+  createPointTransaction(transaction: InsertPointTransaction): Promise<PointTransaction>;
+  getUserTransactions(userId: number): Promise<PointTransaction[]>;
+  getTransaction(id: number): Promise<PointTransaction | undefined>;
 }
 
 export class MemStorage implements IStorage {
@@ -100,26 +119,38 @@ export class MemStorage implements IStorage {
   private stockCategories: Map<number, StockCategory>;
   private referenceImages: Map<number, ReferenceImage>;
   private thumbnails: Map<number, Thumbnail>;
+  private pointPackages: Map<number, PointPackage>;
+  private pointTransactions: Map<number, PointTransaction>;
   
   private userIdCounter: number;
   private referenceImageIdCounter: number;
   private thumbnailIdCounter: number;
+  private pointPackageIdCounter: number;
+  private pointTransactionIdCounter: number;
 
   constructor() {
     this.users = new Map();
     this.stockCategories = new Map();
     this.referenceImages = new Map();
     this.thumbnails = new Map();
+    this.pointPackages = new Map();
+    this.pointTransactions = new Map();
     
     this.userIdCounter = 1;
     this.referenceImageIdCounter = initialReferenceImages.length + 1;
     this.thumbnailIdCounter = 1;
+    this.pointPackageIdCounter = 1;
+    this.pointTransactionIdCounter = 1;
     
     // Initialize with default user
     this.users.set(1, {
       id: 1,
       username: "demo",
-      password: "password"
+      email: "demo@example.com",
+      password: "password",
+      points: 3,
+      createdAt: new Date().toISOString(),
+      stripeCustomerId: null
     });
     
     // Initialize stock categories
@@ -177,6 +208,31 @@ export class MemStorage implements IStorage {
       },
       userId: 1
     });
+    
+    // Initialize point packages with the specified tiers
+    this.pointPackages.set(1, {
+      id: 1,
+      name: "Basic Pack",
+      points: 5,
+      price: 499, // $4.99
+      active: true
+    });
+    
+    this.pointPackages.set(2, {
+      id: 2,
+      name: "Standard Pack",
+      points: 15,
+      price: 999, // $9.99
+      active: true
+    });
+    
+    this.pointPackages.set(3, {
+      id: 3,
+      name: "Pro Pack",
+      points: 50,
+      price: 1999, // $19.99
+      active: true
+    });
   }
 
   // User methods
@@ -189,12 +245,49 @@ export class MemStorage implements IStorage {
       (user) => user.username === username
     );
   }
+  
+  async getUserByEmail(email: string): Promise<User | undefined> {
+    return Array.from(this.users.values()).find(
+      (user) => user.email === email
+    );
+  }
 
   async createUser(insertUser: InsertUser): Promise<User> {
     const id = this.userIdCounter++;
-    const user: User = { ...insertUser, id };
+    const user: User = { 
+      ...insertUser, 
+      id,
+      points: 1, // Start with 1 free point
+      createdAt: new Date().toISOString(),
+      stripeCustomerId: null
+    };
     this.users.set(id, user);
     return user;
+  }
+  
+  async updateUser(id: number, userData: Partial<User>): Promise<User | undefined> {
+    const user = this.users.get(id);
+    if (!user) return undefined;
+    
+    const updatedUser = { ...user, ...userData };
+    this.users.set(id, updatedUser);
+    return updatedUser;
+  }
+  
+  async updateUserPoints(id: number, pointChange: number): Promise<User | undefined> {
+    const user = this.users.get(id);
+    if (!user) return undefined;
+    
+    // Prevent negative points
+    const newPoints = Math.max(0, (user.points || 0) + pointChange);
+    
+    const updatedUser = { 
+      ...user, 
+      points: newPoints
+    };
+    
+    this.users.set(id, updatedUser);
+    return updatedUser;
   }
   
   // Stock category methods
@@ -249,6 +342,12 @@ export class MemStorage implements IStorage {
     return Array.from(this.thumbnails.values())
       .sort((a, b) => b.id - a.id)
       .slice(0, 5);
+  }
+  
+  async getUserThumbnails(userId: number): Promise<Thumbnail[]> {
+    return Array.from(this.thumbnails.values())
+      .filter(thumbnail => thumbnail.userId === userId)
+      .sort((a, b) => b.id - a.id);
   }
   
   async createThumbnail(thumbnail: InsertThumbnail): Promise<Thumbnail> {
@@ -313,6 +412,55 @@ export class MemStorage implements IStorage {
       console.error("Error exporting thumbnail:", error);
       throw error;
     }
+  }
+  
+  // Point package methods
+  async getPointPackages(): Promise<PointPackage[]> {
+    return Array.from(this.pointPackages.values())
+      .filter(pkg => pkg.active)
+      .sort((a, b) => a.price - b.price);
+  }
+  
+  async getPointPackage(id: number): Promise<PointPackage | undefined> {
+    return this.pointPackages.get(id);
+  }
+  
+  async createPointPackage(pkg: InsertPointPackage): Promise<PointPackage> {
+    const id = this.pointPackageIdCounter++;
+    const newPackage: PointPackage = { ...pkg, id };
+    this.pointPackages.set(id, newPackage);
+    return newPackage;
+  }
+  
+  async updatePointPackage(id: number, pkg: Partial<InsertPointPackage>): Promise<PointPackage | undefined> {
+    const existing = this.pointPackages.get(id);
+    if (!existing) return undefined;
+    
+    const updated: PointPackage = { ...existing, ...pkg };
+    this.pointPackages.set(id, updated);
+    return updated;
+  }
+  
+  // Transaction methods
+  async createPointTransaction(transaction: InsertPointTransaction): Promise<PointTransaction> {
+    const id = this.pointTransactionIdCounter++;
+    const newTransaction: PointTransaction = {
+      ...transaction,
+      id,
+      createdAt: new Date().toISOString()
+    };
+    this.pointTransactions.set(id, newTransaction);
+    return newTransaction;
+  }
+  
+  async getUserTransactions(userId: number): Promise<PointTransaction[]> {
+    return Array.from(this.pointTransactions.values())
+      .filter(tx => tx.userId === userId)
+      .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+  }
+  
+  async getTransaction(id: number): Promise<PointTransaction | undefined> {
+    return this.pointTransactions.get(id);
   }
 }
 

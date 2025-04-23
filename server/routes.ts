@@ -1,13 +1,35 @@
-import type { Express } from "express";
+import type { Express, Request, Response, NextFunction } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import multer from "multer";
 import path from "path";
 import sharp from "sharp";
 import fs from "fs";
-import { insertThumbnailSchema } from "@shared/schema";
+import { 
+  insertThumbnailSchema, 
+  insertUserSchema, 
+  insertPointTransactionSchema 
+} from "@shared/schema";
+import { z } from "zod";
 import { ZodError } from "zod";
 import { fromZodError } from "zod-validation-error";
+import crypto from "crypto";
+import Stripe from "stripe";
+
+// Middleware for JWT token-based authentication
+interface AuthRequest extends Request {
+  user?: {
+    id: number;
+    username: string;
+    email: string;
+  };
+  file?: any; // For multer file uploads
+}
+
+// Create Stripe instance if secret key is available
+const stripe = process.env.STRIPE_SECRET_KEY 
+  ? new Stripe(process.env.STRIPE_SECRET_KEY, { apiVersion: "2023-10-16" as any })
+  : null;
 
 // Setup multer for file uploads
 const upload = multer({
@@ -36,7 +58,289 @@ if (!fs.existsSync(uploadsDir)) {
   fs.mkdirSync(uploadsDir, { recursive: true });
 }
 
+// Helper function to hash passwords
+async function hashPassword(password: string): Promise<string> {
+  return new Promise((resolve, reject) => {
+    // Generate random salt
+    const salt = crypto.randomBytes(16).toString('hex');
+    
+    // Hash password with salt
+    crypto.scrypt(password, salt, 64, (err, derivedKey) => {
+      if (err) reject(err);
+      resolve(derivedKey.toString('hex') + '.' + salt);
+    });
+  });
+}
+
+// Helper function to verify passwords
+async function verifyPassword(password: string, hashedPassword: string): Promise<boolean> {
+  return new Promise((resolve, reject) => {
+    const [hash, salt] = hashedPassword.split('.');
+    crypto.scrypt(password, salt, 64, (err, derivedKey) => {
+      if (err) reject(err);
+      resolve(hash === derivedKey.toString('hex'));
+    });
+  });
+}
+
+// Authentication middleware
+function authenticate(req: AuthRequest, res: Response, next: NextFunction) {
+  const authHeader = req.headers.authorization;
+  if (!authHeader || !authHeader.startsWith('Bearer ')) {
+    return res.status(401).json({ error: 'Unauthorized' });
+  }
+  
+  const token = authHeader.split(' ')[1];
+  try {
+    // In a real app, you would verify and decode a JWT token
+    // For this demo, we'll use a simplified approach
+    const userId = parseInt(token);
+    
+    if (isNaN(userId)) {
+      return res.status(401).json({ error: 'Invalid token' });
+    }
+    
+    storage.getUser(userId)
+      .then(user => {
+        if (!user) {
+          return res.status(401).json({ error: 'User not found' });
+        }
+        
+        req.user = {
+          id: user.id,
+          username: user.username,
+          email: user.email
+        };
+        
+        next();
+      })
+      .catch(error => {
+        console.error('Authentication error:', error);
+        res.status(500).json({ error: 'Authentication failed' });
+      });
+  } catch (error) {
+    res.status(401).json({ error: 'Invalid token' });
+  }
+}
+
 export async function registerRoutes(app: Express): Promise<Server> {
+  // ===== USER ROUTES =====
+  
+  // Register a new user
+  app.post('/api/auth/register', async (req, res) => {
+    try {
+      // Validate request data
+      const userData = insertUserSchema.parse(req.body);
+      
+      // Check if user already exists
+      const existingUser = await storage.getUserByUsername(userData.username);
+      if (existingUser) {
+        return res.status(409).json({ error: 'Username already taken' });
+      }
+      
+      const existingEmail = await storage.getUserByEmail(userData.email);
+      if (existingEmail) {
+        return res.status(409).json({ error: 'Email already registered' });
+      }
+      
+      // Hash password
+      const hashedPassword = await hashPassword(userData.password);
+      
+      // Create user
+      const user = await storage.createUser({
+        ...userData,
+        password: hashedPassword
+      });
+      
+      // Return user without password
+      const { password, ...userWithoutPassword } = user;
+      res.status(201).json({
+        user: userWithoutPassword,
+        token: String(user.id) // In a real app, this would be a JWT token
+      });
+    } catch (error) {
+      if (error instanceof ZodError) {
+        const validationError = fromZodError(error);
+        return res.status(400).json({ error: validationError.message });
+      }
+      console.error('Registration error:', error);
+      res.status(500).json({ error: 'Registration failed' });
+    }
+  });
+  
+  // Login
+  app.post('/api/auth/login', async (req, res) => {
+    try {
+      const { username, password } = req.body;
+      
+      if (!username || !password) {
+        return res.status(400).json({ error: 'Username and password are required' });
+      }
+      
+      // Find user
+      const user = await storage.getUserByUsername(username);
+      if (!user) {
+        return res.status(401).json({ error: 'Invalid credentials' });
+      }
+      
+      // Verify password
+      const validPassword = await verifyPassword(password, user.password);
+      if (!validPassword) {
+        return res.status(401).json({ error: 'Invalid credentials' });
+      }
+      
+      // Return user without password
+      const { password: _, ...userWithoutPassword } = user;
+      res.json({
+        user: userWithoutPassword,
+        token: String(user.id) // In a real app, this would be a JWT token
+      });
+    } catch (error) {
+      console.error('Login error:', error);
+      res.status(500).json({ error: 'Login failed' });
+    }
+  });
+  
+  // Get current user
+  app.get('/api/user', authenticate, (req: AuthRequest, res) => {
+    res.json(req.user);
+  });
+  
+  // ===== POINT SYSTEM ROUTES =====
+  
+  // Get available point packages
+  app.get('/api/point-packages', async (req, res) => {
+    try {
+      const packages = await storage.getPointPackages();
+      res.json(packages);
+    } catch (error) {
+      console.error('Error fetching point packages:', error);
+      res.status(500).json({ error: 'Failed to fetch point packages' });
+    }
+  });
+  
+  // Get user transactions
+  app.get('/api/transactions', authenticate, async (req: AuthRequest, res) => {
+    try {
+      if (!req.user) return res.status(401).json({ error: 'Unauthorized' });
+      
+      const transactions = await storage.getUserTransactions(req.user.id);
+      res.json(transactions);
+    } catch (error) {
+      console.error('Error fetching transactions:', error);
+      res.status(500).json({ error: 'Failed to fetch transactions' });
+    }
+  });
+  
+  // Purchase points
+  app.post('/api/purchase-points', authenticate, async (req: AuthRequest, res) => {
+    try {
+      if (!req.user) return res.status(401).json({ error: 'Unauthorized' });
+      
+      const { packageId } = req.body;
+      
+      if (!packageId) {
+        return res.status(400).json({ error: 'Package ID is required' });
+      }
+      
+      // Get package
+      const pointPackage = await storage.getPointPackage(parseInt(packageId));
+      if (!pointPackage) {
+        return res.status(404).json({ error: 'Point package not found' });
+      }
+      
+      if (!pointPackage.active) {
+        return res.status(400).json({ error: 'This package is no longer available' });
+      }
+      
+      // Initialize Stripe payment (if stripe is available)
+      let paymentIntentId = null;
+      if (stripe) {
+        const paymentIntent = await stripe.paymentIntents.create({
+          amount: pointPackage.price,
+          currency: 'usd',
+          metadata: {
+            userId: String(req.user.id),
+            packageId: String(pointPackage.id)
+          }
+        });
+        
+        paymentIntentId = paymentIntent.id;
+      } else {
+        // If Stripe is not available, simulate a successful payment for demo
+        console.log('Stripe not configured. Simulating payment for demo purposes.');
+      }
+      
+      // Create transaction record
+      const transaction = await storage.createPointTransaction({
+        userId: req.user.id,
+        packageId: pointPackage.id,
+        points: pointPackage.points,
+        description: `Purchase of ${pointPackage.name}`,
+        stripePaymentIntentId: paymentIntentId
+      });
+      
+      // Add points to user (in a real app, this would happen after payment confirmation)
+      const updatedUser = await storage.updateUserPoints(req.user.id, pointPackage.points);
+      
+      let clientSecret = null;
+      if (stripe && paymentIntentId) {
+        const paymentIntent = await stripe.paymentIntents.retrieve(paymentIntentId);
+        clientSecret = paymentIntent.client_secret;
+      }
+      
+      res.json({
+        transaction,
+        user: updatedUser,
+        clientSecret
+      });
+    } catch (error) {
+      console.error('Error purchasing points:', error);
+      res.status(500).json({ error: 'Failed to purchase points' });
+    }
+  });
+  
+  // Use points to create a thumbnail
+  app.post('/api/use-points', authenticate, async (req: AuthRequest, res) => {
+    try {
+      if (!req.user) return res.status(401).json({ error: 'Unauthorized' });
+      
+      // Get user
+      const user = await storage.getUser(req.user.id);
+      if (!user) {
+        return res.status(404).json({ error: 'User not found' });
+      }
+      
+      // Check if user has points
+      if (user.points < 1) {
+        return res.status(403).json({ 
+          error: 'Insufficient points', 
+          pointsRequired: 1,
+          currentPoints: user.points
+        });
+      }
+      
+      // Deduct points
+      const updatedUser = await storage.updateUserPoints(user.id, -1);
+      
+      // Create transaction record
+      const transaction = await storage.createPointTransaction({
+        userId: user.id,
+        points: -1,
+        description: 'Created thumbnail',
+      });
+      
+      res.json({
+        success: true,
+        remainingPoints: updatedUser?.points || 0,
+        transaction
+      });
+    } catch (error) {
+      console.error('Error using points:', error);
+      res.status(500).json({ error: 'Failed to use points' });
+    }
+  });
+  
   // Get stock categories
   app.get("/api/stock-categories", async (req, res) => {
     try {
@@ -59,10 +363,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Upload image
-  app.post("/api/upload", upload.single("image"), async (req, res) => {
+  app.post("/api/upload", authenticate, upload.single("image"), async (req: AuthRequest, res) => {
     try {
       if (!req.file) {
         return res.status(400).json({ error: "No file uploaded" });
+      }
+
+      if (!req.user) {
+        return res.status(401).json({ error: "Unauthorized" });
       }
 
       // Process the image with sharp
@@ -84,7 +392,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         url: imageUrl,
         alt: req.body.alt || "Uploaded image",
         categoryId: req.body.categoryId ? parseInt(req.body.categoryId) : undefined,
-        userId: 1, // Default user ID for demo
+        userId: req.user.id,
         isStock: false
       });
 
@@ -109,12 +417,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Save thumbnail
-  app.post("/api/thumbnails", async (req, res) => {
+  app.post("/api/thumbnails", authenticate, async (req: AuthRequest, res) => {
     try {
+      if (!req.user) {
+        return res.status(401).json({ error: "Unauthorized" });
+      }
+
       // Validate the request body
       const thumbnailData = insertThumbnailSchema.parse({
         ...req.body,
-        userId: 1 // Default user for demo
+        userId: req.user.id
       });
 
       // Save to storage
@@ -129,20 +441,56 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
     }
   });
+  
+  // Get user thumbnails
+  app.get("/api/user/thumbnails", authenticate, async (req: AuthRequest, res) => {
+    try {
+      if (!req.user) {
+        return res.status(401).json({ error: "Unauthorized" });
+      }
+      
+      const thumbnails = await storage.getUserThumbnails(req.user.id);
+      res.json(thumbnails);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to fetch user thumbnails" });
+    }
+  });
 
   // Export thumbnail
-  app.post("/api/thumbnails/export", async (req, res) => {
+  app.post("/api/thumbnails/export", authenticate, async (req: AuthRequest, res) => {
     try {
+      if (!req.user) {
+        return res.status(401).json({ error: "Unauthorized" });
+      }
+      
       const { imageUrl, elements, filters } = req.body;
       
       if (!imageUrl) {
         return res.status(400).json({ error: "Image URL is required" });
       }
 
+      // Check if user has enough points
+      const user = await storage.getUser(req.user.id);
+      if (!user || user.points < 1) {
+        return res.status(403).json({ 
+          error: "Insufficient points", 
+          pointsRequired: 1,
+          currentPoints: user?.points || 0
+        });
+      }
+
       // Process with Sharp
       // For demo purposes, we'll just return the image
       // In a real implementation, we would process the image with text overlays
       const imageBuffer = await storage.exportThumbnail(imageUrl, elements, filters);
+      
+      // Deduct a point and record the transaction
+      await storage.updateUserPoints(req.user.id, -1);
+      await storage.createPointTransaction({
+        userId: req.user.id,
+        points: -1,
+        description: "Exported thumbnail"
+      });
       
       // Set response headers
       res.setHeader("Content-Type", "image/png");

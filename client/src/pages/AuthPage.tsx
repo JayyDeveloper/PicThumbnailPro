@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useLocation } from "wouter";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
@@ -38,11 +38,12 @@ export default function AuthPage() {
   const { user, loginMutation, registerMutation } = useAuth();
   const [activeTab, setActiveTab] = useState<string>("login");
 
-  // If the user is already logged in, redirect to the home page
-  if (user) {
-    setLocation("/");
-    return null;
-  }
+  // Redirect if user is logged in (using useEffect to avoid hooks error)
+  useEffect(() => {
+    if (user) {
+      setLocation("/");
+    }
+  }, [user, setLocation]);
 
   // Login form setup
   const loginForm = useForm<LoginFormValues>({

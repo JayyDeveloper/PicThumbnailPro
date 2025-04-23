@@ -107,6 +107,7 @@ export default function AccountPage() {
         <div className="col-span-1 md:col-span-3">
           <Card>
             <CardHeader>
+              <h2 className="text-xl font-semibold mb-4">Account Dashboard</h2>
               <Tabs defaultValue="thumbnails" value={activeTab} onValueChange={setActiveTab}>
                 <TabsList>
                   <TabsTrigger value="thumbnails">My Thumbnails</TabsTrigger>
@@ -115,97 +116,101 @@ export default function AccountPage() {
               </Tabs>
             </CardHeader>
             <CardContent>
-              <TabsContent value="thumbnails" className="mt-0">
-                <div className="flex justify-between items-center mb-4">
-                  <h2 className="text-lg font-semibold">Your Created Thumbnails</h2>
-                  <Button asChild>
-                    <Link href="/editor">
-                      <Plus className="h-4 w-4 mr-1" />
-                      Create New
-                    </Link>
-                  </Button>
-                </div>
-                
-                {thumbnailsLoading ? (
-                  <div className="py-10 text-center">Loading thumbnails...</div>
-                ) : thumbnails.length === 0 ? (
-                  <div className="py-10 text-center">
-                    <Image className="h-12 w-12 mx-auto text-gray-400 mb-4" />
-                    <h3 className="text-lg font-medium">No thumbnails yet</h3>
-                    <p className="text-gray-500 mt-2">Create your first thumbnail to see it here.</p>
-                    <Button className="mt-4" asChild>
+              {activeTab === "thumbnails" && (
+                <div>
+                  <div className="flex justify-between items-center mb-4">
+                    <h3 className="text-lg font-semibold">Your Created Thumbnails</h3>
+                    <Button asChild>
                       <Link href="/editor">
                         <Plus className="h-4 w-4 mr-1" />
-                        Create Thumbnail
+                        Create New
                       </Link>
                     </Button>
                   </div>
-                ) : (
-                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                    {thumbnails.map((thumbnail: any) => (
-                      <Card key={thumbnail.id} className="overflow-hidden group">
-                        <div className="aspect-video relative overflow-hidden">
-                          <img 
-                            src={thumbnail.imageUrl} 
-                            alt={thumbnail.name} 
-                            className="w-full h-full object-cover"
-                          />
-                          <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-50 transition-all flex items-center justify-center opacity-0 group-hover:opacity-100">
-                            <Button size="sm" variant="secondary" className="mr-2" asChild>
-                              <Link href={`/editor?id=${thumbnail.id}`}>
-                                <Edit className="h-4 w-4 mr-1" />
-                                Edit
-                              </Link>
-                            </Button>
-                          </div>
-                        </div>
-                        <CardContent className="p-3">
-                          <h3 className="font-medium truncate">{thumbnail.name}</h3>
-                          <p className="text-xs text-gray-500">
-                            Created: {new Date(thumbnail.createdAt).toLocaleDateString()}
-                          </p>
-                        </CardContent>
-                      </Card>
-                    ))}
-                  </div>
-                )}
-              </TabsContent>
-              
-              <TabsContent value="transactions" className="mt-0">
-                <div className="flex justify-between items-center mb-4">
-                  <h2 className="text-lg font-semibold">Point Transactions</h2>
-                </div>
-                
-                {transactionsLoading ? (
-                  <div className="py-10 text-center">Loading transactions...</div>
-                ) : transactions.length === 0 ? (
-                  <div className="py-10 text-center">
-                    <History className="h-12 w-12 mx-auto text-gray-400 mb-4" />
-                    <h3 className="text-lg font-medium">No transactions yet</h3>
-                    <p className="text-gray-500 mt-2">Your point transactions will appear here.</p>
-                  </div>
-                ) : (
-                  <ScrollArea className="h-[400px]">
-                    <div className="space-y-2">
-                      {transactions.map((transaction: any) => (
-                        <Card key={transaction.id} className="p-4">
-                          <div className="flex justify-between items-center">
-                            <div>
-                              <p className="font-medium">{transaction.description}</p>
-                              <p className="text-xs text-gray-500">
-                                {new Date(transaction.createdAt).toLocaleString()}
-                              </p>
-                            </div>
-                            <div className={`font-bold ${transaction.points > 0 ? 'text-green-600' : 'text-red-600'}`}>
-                              {transaction.points > 0 ? '+' : ''}{transaction.points} points
+                  
+                  {thumbnailsLoading ? (
+                    <div className="py-10 text-center">Loading thumbnails...</div>
+                  ) : thumbnails.length === 0 ? (
+                    <div className="py-10 text-center">
+                      <Image className="h-12 w-12 mx-auto text-gray-400 mb-4" />
+                      <h3 className="text-lg font-medium">No thumbnails yet</h3>
+                      <p className="text-gray-500 mt-2">Create your first thumbnail to see it here.</p>
+                      <Button className="mt-4" asChild>
+                        <Link href="/editor">
+                          <Plus className="h-4 w-4 mr-1" />
+                          Create Thumbnail
+                        </Link>
+                      </Button>
+                    </div>
+                  ) : (
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                      {thumbnails.map((thumbnail: any) => (
+                        <Card key={thumbnail.id} className="overflow-hidden group">
+                          <div className="aspect-video relative overflow-hidden">
+                            <img 
+                              src={thumbnail.imageUrl} 
+                              alt={thumbnail.name} 
+                              className="w-full h-full object-cover"
+                            />
+                            <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-50 transition-all flex items-center justify-center opacity-0 group-hover:opacity-100">
+                              <Button size="sm" variant="secondary" className="mr-2" asChild>
+                                <Link href={`/editor?id=${thumbnail.id}`}>
+                                  <Edit className="h-4 w-4 mr-1" />
+                                  Edit
+                                </Link>
+                              </Button>
                             </div>
                           </div>
+                          <CardContent className="p-3">
+                            <h3 className="font-medium truncate">{thumbnail.name}</h3>
+                            <p className="text-xs text-gray-500">
+                              Created: {new Date(thumbnail.createdAt).toLocaleDateString()}
+                            </p>
+                          </CardContent>
                         </Card>
                       ))}
                     </div>
-                  </ScrollArea>
-                )}
-              </TabsContent>
+                  )}
+                </div>
+              )}
+              
+              {activeTab === "transactions" && (
+                <div>
+                  <div className="flex justify-between items-center mb-4">
+                    <h3 className="text-lg font-semibold">Point Transactions</h3>
+                  </div>
+                  
+                  {transactionsLoading ? (
+                    <div className="py-10 text-center">Loading transactions...</div>
+                  ) : transactions.length === 0 ? (
+                    <div className="py-10 text-center">
+                      <History className="h-12 w-12 mx-auto text-gray-400 mb-4" />
+                      <h3 className="text-lg font-medium">No transactions yet</h3>
+                      <p className="text-gray-500 mt-2">Your point transactions will appear here.</p>
+                    </div>
+                  ) : (
+                    <ScrollArea className="h-[400px]">
+                      <div className="space-y-2">
+                        {transactions.map((transaction: any) => (
+                          <Card key={transaction.id} className="p-4">
+                            <div className="flex justify-between items-center">
+                              <div>
+                                <p className="font-medium">{transaction.description}</p>
+                                <p className="text-xs text-gray-500">
+                                  {new Date(transaction.createdAt).toLocaleString()}
+                                </p>
+                              </div>
+                              <div className={`font-bold ${transaction.points > 0 ? 'text-green-600' : 'text-red-600'}`}>
+                                {transaction.points > 0 ? '+' : ''}{transaction.points} points
+                              </div>
+                            </div>
+                          </Card>
+                        ))}
+                      </div>
+                    </ScrollArea>
+                  )}
+                </div>
+              )}
             </CardContent>
           </Card>
         </div>

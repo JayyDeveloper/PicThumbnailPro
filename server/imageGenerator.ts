@@ -5,17 +5,20 @@ import { v4 as uuidv4 } from "uuid";
 
 /**
  * Generate or find an image based on a text prompt
- * Using Unsplash source API for free images
+ * Using Lorem Picsum (picsum.photos) for free placeholder images
+ * with a seed based on the search term to provide different images
+ * for different prompts
  */
 export async function generateImageFromPrompt(prompt: string): Promise<string> {
   try {
     // Create a search-friendly version of the prompt
-    const searchTerm = encodeURIComponent(prompt.trim().toLowerCase());
+    const searchTerm = prompt.trim().toLowerCase();
     
-    // Use Unsplash Source API which is free and doesn't require API keys
-    // It returns a random image based on the search term
-    // Format: https://source.unsplash.com/1600x900/?search_term
-    const imageUrl = `https://source.unsplash.com/1600x900/?${searchTerm}`;
+    // Convert the search term to a numeric seed by summing character codes
+    const seed = searchTerm.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
+    
+    // Use picsum.photos with a seed based on the search term so different terms give different images
+    const imageUrl = `https://picsum.photos/seed/${seed}/1280/720`;
     
     // Download and save the image
     const filename = `generated-${uuidv4()}.jpg`;
@@ -43,8 +46,16 @@ export async function generateImageFromPrompt(prompt: string): Promise<string> {
  */
 function downloadImage(url: string, filepath: string): Promise<void> {
   return new Promise((resolve, reject) => {
-    https.get(url, (response) => {
-      if (response.statusCode !== 200) {
+    const request = https.get(url, (response) => {
+      // Handle redirects (status codes 301, 302, 307, 308)
+      if (response.statusCode && response.statusCode >= 300 && response.statusCode < 400 && response.headers.location) {
+        // If we get a redirect, follow it
+        return downloadImage(response.headers.location, filepath)
+          .then(resolve)
+          .catch(reject);
+      }
+
+      if (!response.statusCode || response.statusCode !== 200) {
         reject(new Error(`Failed to download image: HTTP ${response.statusCode}`));
         return;
       }
@@ -62,8 +73,16 @@ function downloadImage(url: string, filepath: string): Promise<void> {
         fs.unlink(filepath, () => {}); // Delete the file if there was an error
         reject(err);
       });
-    }).on("error", (err) => {
+    });
+    
+    request.on("error", (err) => {
       reject(err);
+    });
+    
+    // Set a timeout of 10 seconds
+    request.setTimeout(10000, () => {
+      request.destroy();
+      reject(new Error("Request timeout"));
     });
   });
 }

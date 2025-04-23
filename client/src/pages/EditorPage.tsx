@@ -312,10 +312,17 @@ export default function EditorPage() {
                 <ThumbnailEditor 
                   thumbnailData={currentThumbnail}
                   selectedElement={selectedElement}
+                  selectedSticker={selectedSticker}
                   onElementSelect={handleElementSelect}
+                  onStickerSelect={handleStickerSelect}
                   onElementUpdate={handleUpdateElement}
+                  onStickerUpdate={handleUpdateSticker}
                   onElementDelete={handleDeleteElement}
+                  onStickerDelete={handleDeleteSticker}
                   onAddText={handleAddTextElement}
+                  onAddSticker={handleAddSticker}
+                  onBringToFront={handleBringToFront}
+                  onSendToBack={handleSendToBack}
                   onReset={handleReset}
                 />
                 
@@ -346,6 +353,14 @@ export default function EditorPage() {
                   selectedElement={selectedElement}
                   onElementUpdate={handleUpdateElement}
                   onAddEmoji={handleAddEmoji}
+                />
+                
+                <StickersPanel
+                  selectedSticker={selectedSticker}
+                  onStickerSelected={handleAddSticker}
+                  onBringToFront={handleBringToFront}
+                  onSendToBack={handleSendToBack}
+                  onDeleteSticker={handleDeleteSticker}
                 />
               </>
             )}

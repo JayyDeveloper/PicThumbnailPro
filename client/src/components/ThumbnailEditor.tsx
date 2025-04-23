@@ -9,30 +9,46 @@ import {
   Undo, 
   RefreshCcw, 
   Save, 
-  Download 
+  Download,
+  ImagePlus
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { ThumbnailData, TextElement } from "@/pages/EditorPage";
+import { StickerElement } from "@/hooks/useStickerEditor";
 import { useMutation } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
 
 interface ThumbnailEditorProps {
   thumbnailData: ThumbnailData;
   selectedElement: TextElement | null;
+  selectedSticker: StickerElement | null;
   onElementSelect: (element: TextElement | null) => void;
+  onStickerSelect: (sticker: StickerElement | null) => void;
   onElementUpdate: (element: TextElement) => void;
+  onStickerUpdate: (sticker: StickerElement) => void;
   onElementDelete: (id: string) => void;
+  onStickerDelete: () => void;
   onAddText: () => void;
+  onAddSticker: (imageUrl: string) => void; 
+  onBringToFront: () => void;
+  onSendToBack: () => void;
   onReset: () => void;
 }
 
 export default function ThumbnailEditor({
   thumbnailData, 
   selectedElement,
+  selectedSticker,
   onElementSelect,
+  onStickerSelect,
   onElementUpdate,
+  onStickerUpdate,
   onElementDelete,
+  onStickerDelete,
   onAddText,
+  onAddSticker,
+  onBringToFront,
+  onSendToBack,
   onReset
 }: ThumbnailEditorProps) {
   const { toast } = useToast();
@@ -110,6 +126,32 @@ export default function ThumbnailEditor({
   const handleMouseDown = (e: React.MouseEvent, element: TextElement) => {
     if (selectedElement?.id !== element.id) {
       onElementSelect(element);
+      
+      // Deselect any sticker when selecting a text element
+      if (selectedSticker) {
+        onStickerSelect(null);
+      }
+    }
+    
+    const rect = (e.target as HTMLElement).getBoundingClientRect();
+    setDragOffset({
+      x: e.clientX - rect.left,
+      y: e.clientY - rect.top
+    });
+    
+    setDragging(true);
+    e.preventDefault();
+  };
+  
+  // Handle mouse events for drag-and-drop sticker elements
+  const handleStickerMouseDown = (e: React.MouseEvent, sticker: StickerElement) => {
+    if (selectedSticker?.id !== sticker.id) {
+      onStickerSelect(sticker);
+      
+      // Deselect any text element when selecting a sticker
+      if (selectedElement) {
+        onElementSelect(null);
+      }
     }
     
     const rect = (e.target as HTMLElement).getBoundingClientRect();
@@ -128,9 +170,7 @@ export default function ThumbnailEditor({
     let lastY = 0;
     let animationFrameId: number | null = null;
     
-    const updateElementPosition = (x: number, y: number) => {
-      if (!selectedElement) return;
-      
+    const updatePosition = (x: number, y: number) => {
       // Calculate the distance moved from the last position
       const deltaX = x - lastX;
       const deltaY = y - lastY;
@@ -140,17 +180,25 @@ export default function ThumbnailEditor({
         lastX = x;
         lastY = y;
         
-        // Update element position with precise values
-        onElementUpdate({
-          ...selectedElement,
-          x: parseFloat(Math.max(0, Math.min(100, x)).toFixed(3)), // Keep 3 decimal places for smoother movement
-          y: parseFloat(Math.max(0, Math.min(100, y)).toFixed(3))
-        });
+        // Update position with precise values based on what's selected
+        if (selectedElement) {
+          onElementUpdate({
+            ...selectedElement,
+            x: parseFloat(Math.max(0, Math.min(100, x)).toFixed(3)), // Keep 3 decimal places for smoother movement
+            y: parseFloat(Math.max(0, Math.min(100, y)).toFixed(3))
+          });
+        } else if (selectedSticker) {
+          onStickerUpdate({
+            ...selectedSticker,
+            x: parseFloat(Math.max(0, Math.min(100, x)).toFixed(3)),
+            y: parseFloat(Math.max(0, Math.min(100, y)).toFixed(3))
+          });
+        }
       }
     };
     
     const handleMouseMove = (e: MouseEvent) => {
-      if (!dragging || !selectedElement || !editorRef.current) return;
+      if (!dragging || (!selectedElement && !selectedSticker) || !editorRef.current) return;
       
       // Cancel any pending animation frame to avoid multiple updates
       if (animationFrameId) {
@@ -171,7 +219,7 @@ export default function ThumbnailEditor({
           lastY = y;
         }
         
-        updateElementPosition(x, y);
+        updatePosition(x, y);
       });
     };
     
@@ -188,7 +236,7 @@ export default function ThumbnailEditor({
       window.removeEventListener('mousemove', handleMouseMove);
       window.removeEventListener('mouseup', handleMouseUp);
     };
-  }, [dragging, dragOffset, selectedElement, onElementUpdate]);
+  }, [dragging, dragOffset, selectedElement, selectedSticker, onElementUpdate, onStickerUpdate]);
 
   // Generate filter styles based on the selected filter name and slider values
   const getFilterStyle = () => {
@@ -279,6 +327,37 @@ export default function ThumbnailEditor({
           </div>
         )}
         
+        {/* Sticker Elements */}
+        {thumbnailData.stickers.map(sticker => (
+          <div 
+            key={sticker.id}
+            className={`absolute sticker-element ${dragging && selectedSticker?.id === sticker.id ? 'dragging' : ''} ${selectedSticker?.id === sticker.id ? 'outline outline-blue-500' : ''}`}
+            style={{
+              left: `${sticker.x}%`,
+              top: `${sticker.y}%`,
+              width: `${sticker.width}px`,
+              height: `${sticker.height}px`,
+              transform: `translate(-50%, -50%) rotate(${sticker.rotation}deg) scale(${sticker.scale})`,
+              transition: dragging ? 'none' : 'box-shadow 0.2s ease, left 0.05s ease-out, top 0.05s ease-out',
+              userSelect: 'none',
+              zIndex: sticker.zIndex,
+              cursor: 'move'
+            }}
+            onClick={(e) => {
+              e.stopPropagation();
+              onStickerSelect(sticker);
+            }}
+            onMouseDown={(e) => handleStickerMouseDown(e, sticker)}
+          >
+            <img 
+              src={sticker.imageUrl} 
+              alt="Sticker" 
+              className="w-full h-full object-contain"
+              draggable="false"
+            />
+          </div>
+        ))}
+        
         {/* Text Elements */}
         {thumbnailData.elements.map(element => (
           <div 
@@ -349,6 +428,25 @@ export default function ThumbnailEditor({
           onClick={onAddText}
         >
           <Type className="h-4 w-4 mr-1" /> Text
+        </Button>
+        <Button
+          variant="outline"
+          size="sm"
+          className="text-sm flex items-center"
+          onClick={() => {
+            // Use a simple sticker URL for demo purposes
+            const demoStickers = [
+              'https://upload.wikimedia.org/wikipedia/commons/thumb/b/bc/Thumbs_up_silhouette.svg/1200px-Thumbs_up_silhouette.svg.png',
+              'https://cdn-icons-png.flaticon.com/512/5231/5231019.png',
+              'https://static.vecteezy.com/system/resources/previews/011/571/337/original/fire-icon-flame-symbol-free-png.png',
+              'https://static.vecteezy.com/system/resources/previews/014/980/555/original/star-icon-transparent-free-png.png',
+              'https://www.freeiconspng.com/thumbs/arrow-icon/arrow-icon--myiconfinder-23.png'
+            ];
+            const randomIndex = Math.floor(Math.random() * demoStickers.length);
+            onAddSticker(demoStickers[randomIndex]);
+          }}
+        >
+          <ImagePlus className="h-4 w-4 mr-1" /> Sticker
         </Button>
         <Button
           variant="outline"

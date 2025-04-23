@@ -19,6 +19,8 @@ export default function ReferenceImagesPanel({ onImageSelected, stockCategories 
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const [selectedCategory, setSelectedCategory] = useState<number | null>(null);
+  const [aiPrompt, setAiPrompt] = useState("");
+  const [isGenerating, setIsGenerating] = useState(false);
   
   // Fetch reference images based on selected category
   const { data: referenceImages = [] } = useQuery<any[]>({
@@ -81,6 +83,50 @@ export default function ReferenceImagesPanel({ onImageSelected, stockCategories 
     }
   };
 
+  // AI image generation mutation
+  const generateImageMutation = useMutation({
+    mutationFn: async (prompt: string) => {
+      const response = await apiRequest("POST", "/api/generate-image", { prompt });
+      
+      if (!response.ok) {
+        throw new Error("Image generation failed");
+      }
+      
+      return response.json();
+    },
+    onSuccess: (data) => {
+      onImageSelected(data.url);
+      setAiPrompt("");
+      setIsGenerating(false);
+      toast({
+        title: "Image Generated",
+        description: "AI has created an image based on your prompt.",
+      });
+    },
+    onError: (error) => {
+      setIsGenerating(false);
+      toast({
+        title: "Generation Failed",
+        description: error.message || "Failed to generate an image. Please try a different prompt.",
+        variant: "destructive",
+      });
+    }
+  });
+
+  const handleGenerateImage = () => {
+    if (!aiPrompt.trim()) {
+      toast({
+        title: "Empty Prompt",
+        description: "Please enter a description of the image you want to generate.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setIsGenerating(true);
+    generateImageMutation.mutate(aiPrompt);
+  };
+
   const handleCategoryClick = (categoryId: number) => {
     setSelectedCategory(categoryId);
   };
@@ -102,6 +148,40 @@ export default function ReferenceImagesPanel({ onImageSelected, stockCategories 
         </Button>
         <input {...getInputProps()} />
         <p className="text-xs text-gray-400 mt-2">Max size: 5MB - Supported formats: JPEG, PNG, GIF</p>
+      </div>
+      
+      {/* AI Image Generation */}
+      <div className="mb-6">
+        <div className="flex justify-between items-center mb-4">
+          <h3 className="font-semibold text-gray-700">Generate AI Image</h3>
+        </div>
+        
+        <div className="relative mb-4">
+          <input 
+            type="text" 
+            value={aiPrompt}
+            onChange={(e) => setAiPrompt(e.target.value)}
+            placeholder="Describe your ideal thumbnail image..." 
+            className="w-full py-2 px-4 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent" 
+            onKeyDown={(e) => e.key === "Enter" && handleGenerateImage()}
+          />
+          <Button 
+            className="absolute right-1 top-1 bg-primary hover:bg-primary/90 text-white"
+            size="sm"
+            onClick={handleGenerateImage}
+            disabled={isGenerating || generateImageMutation.isPending}
+          >
+            {isGenerating || generateImageMutation.isPending ? (
+              <>
+                <div className="h-4 w-4 mr-2 animate-spin rounded-full border-2 border-white border-t-transparent"></div>
+                Generating...
+              </>
+            ) : (
+              'Generate'
+            )}
+          </Button>
+        </div>
+        <p className="text-xs text-gray-500 mb-2">Example: "A stunning mountain landscape at sunset with dramatic clouds"</p>
       </div>
       
       {/* Stock Categories */}

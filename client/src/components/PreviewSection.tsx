@@ -85,6 +85,28 @@ export default function PreviewSection({ thumbnailData }: PreviewSectionProps) {
               </div>
             )}
             
+            {/* Sticker Elements */}
+            {thumbnailData.stickers.map(sticker => (
+              <div 
+                key={sticker.id}
+                className="absolute sticker-element"
+                style={{
+                  left: `${sticker.x}%`,
+                  top: `${sticker.y}%`,
+                  width: `${sticker.width * 0.7}px`, // Scale down for preview
+                  height: `${sticker.height * 0.7}px`, // Scale down for preview
+                  transform: `translate(-50%, -50%) rotate(${sticker.rotation}deg) scale(${sticker.scale})`,
+                  zIndex: sticker.zIndex,
+                }}
+              >
+                <img 
+                  src={sticker.imageUrl} 
+                  alt="Sticker" 
+                  className="w-full h-full object-contain"
+                />
+              </div>
+            ))}
+            
             {/* Text Elements */}
             {thumbnailData.elements.map(element => (
               <div 

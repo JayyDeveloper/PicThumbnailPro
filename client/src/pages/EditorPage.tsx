@@ -167,7 +167,7 @@ export default function EditorPage() {
       x: 50,
       y: 50,
       fontSize: 48, // Larger font size for emojis
-      fontFamily: "Inter",
+      fontFamily: "Poppins", // Modern font that displays emojis well
       fontWeight: "Regular",
       color: "#FFFFFF",
       backgroundColor: "transparent",

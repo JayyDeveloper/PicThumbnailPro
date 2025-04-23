@@ -8,9 +8,57 @@ interface PreviewSectionProps {
 }
 
 export default function PreviewSection({ thumbnailData }: PreviewSectionProps) {
-  // Generate filter styles 
+  // Generate filter styles based on the selected filter name and slider values
   const getFilterStyle = () => {
-    const { brightness, contrast, saturation, blur } = thumbnailData.filters;
+    const { brightness, contrast, saturation, blur, filterName } = thumbnailData.filters;
+    
+    // Apply the named filter presets
+    if (filterName) {
+      switch (filterName) {
+        case 'Normal':
+          return {
+            filter: `brightness(${100 + brightness}%) contrast(${100 + contrast}%) saturate(${100 + saturation}%) blur(${blur}px)`,
+          };
+        case 'Muted':
+          return {
+            filter: `brightness(${100 + brightness}%) contrast(${100 + contrast}%) saturate(${50 + saturation * 0.5}%) blur(${blur}px)`,
+          };
+        case 'Vibrant':
+          return {
+            filter: `brightness(${100 + brightness}%) contrast(${100 + contrast}%) saturate(${150 + saturation * 0.5}%) blur(${blur}px)`,
+          };
+        case 'Dramatic':
+          return {
+            filter: `brightness(${110 + brightness * 0.5}%) contrast(${140 + contrast * 0.3}%) saturate(${120 + saturation * 0.3}%) blur(${blur}px)`,
+          };
+        case 'Retro':
+          return {
+            filter: `brightness(${100 + brightness}%) contrast(${100 + contrast}%) saturate(${120 + saturation * 0.3}%) sepia(60%) hue-rotate(320deg) blur(${blur}px)`,
+          };
+        case 'Neon':
+          return {
+            filter: `brightness(${110 + brightness * 0.5}%) contrast(${120 + contrast * 0.3}%) saturate(${180 + saturation * 0.2}%) hue-rotate(20deg) blur(${blur}px)`,
+          };
+        case 'Noir':
+          return {
+            filter: `grayscale(100%) contrast(${120 + contrast * 0.3}%) brightness(${90 + brightness * 0.5}%) blur(${blur}px)`,
+          };
+        case 'Vintage':
+          return {
+            filter: `sepia(40%) brightness(${90 + brightness * 0.5}%) contrast(${85 + contrast * 0.3}%) saturate(${110 + saturation * 0.3}%) hue-rotate(350deg) blur(${blur}px)`,
+          };
+        case 'Blueprint':
+          return {
+            filter: `brightness(${100 + brightness * 0.5}%) contrast(${100 + contrast * 0.3}%) grayscale(100%) invert(90%) sepia(100%) hue-rotate(180deg) blur(${blur}px)`,
+          };
+        default:
+          return {
+            filter: `brightness(${100 + brightness}%) contrast(${100 + contrast}%) saturate(${100 + saturation}%) blur(${blur}px)`,
+          };
+      }
+    }
+    
+    // Default filter just using the sliders
     return {
       filter: `brightness(${100 + brightness}%) contrast(${100 + contrast}%) saturate(${100 + saturation}%) blur(${blur}px)`,
     };

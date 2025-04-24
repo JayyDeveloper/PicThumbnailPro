@@ -154,10 +154,10 @@ export default function StickersPanel({
       <CardContent className="p-4">
         {selectedSticker ? (
           <div className="text-center mb-4">
-            <p className="text-sm text-gray-500 mb-2">Selected Sticker</p>
+            <p className="text-sm text-muted-foreground mb-2">Selected Sticker</p>
             <div className="flex justify-center">
               <div 
-                className="relative w-20 h-20 rounded border border-gray-200 flex items-center justify-center p-2 bg-gray-50"
+                className="relative w-20 h-20 rounded border border-border flex items-center justify-center p-2 bg-muted/50"
               >
                 <img 
                   src={selectedSticker.imageUrl} 
@@ -168,7 +168,7 @@ export default function StickersPanel({
             </div>
           </div>
         ) : (
-          <p className="text-sm text-center text-gray-500 mb-4">
+          <p className="text-sm text-center text-muted-foreground mb-4">
             Click on a sticker to add it to your thumbnail
           </p>
         )}
@@ -214,7 +214,7 @@ export default function StickersPanel({
               </div>
             ) : (
               <div className="text-center py-4">
-                <p className="text-sm text-gray-500 mb-2">No custom stickers yet</p>
+                <p className="text-sm text-muted-foreground mb-2">No custom stickers yet</p>
               </div>
             )}
             
@@ -244,7 +244,7 @@ export default function StickersPanel({
         </Tabs>
         
         <div className="mt-4">
-          <p className="text-xs text-gray-500 text-center">
+          <p className="text-xs text-muted-foreground text-center">
             <Layers className="h-3 w-3 inline mr-1" />
             Tip: Layer stickers to create complex designs
           </p>
@@ -258,7 +258,7 @@ export default function StickersPanel({
 function StickerItem({ url, onSelect }: { url: string; onSelect: (url: string) => void }) {
   return (
     <div 
-      className="w-full aspect-square p-2 bg-gray-50 rounded border border-gray-200 hover:border-primary cursor-pointer flex items-center justify-center transition-colors"
+      className="w-full aspect-square p-2 bg-muted/50 rounded border border-border hover:border-primary cursor-pointer flex items-center justify-center transition-colors"
       onClick={() => onSelect(url)}
     >
       <img 

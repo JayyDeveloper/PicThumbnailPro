@@ -216,7 +216,7 @@ export default function EmojiTextStyleGenerator({
                     disabled={!selectedElement}
                   >
                     <div className="flex flex-col items-start">
-                      <span className="text-sm text-gray-500 mb-1">{style.name}</span>
+                      <span className="text-sm text-muted-foreground mb-1">{style.name}</span>
                       <span 
                         style={{
                           color: style.style.color,

@@ -125,12 +125,28 @@ export default function PreviewSection({ thumbnailData }: PreviewSectionProps) {
               >
                 <h3 
                   style={{
-                    color: element.color,
+                    color: element.gradient?.enabled 
+                      ? 'transparent' 
+                      : element.color,
                     fontSize: `${element.fontSize * 0.7}px`, // Scale down for preview
                     fontFamily: element.fontFamily,
                     fontWeight: element.fontWeight,
                     fontStyle: element.italic ? 'italic' : 'normal',
                     textDecoration: element.underline ? 'underline' : 'none',
+                    letterSpacing: element.letterSpacing ? `${element.letterSpacing}px` : 'normal',
+                    textTransform: (element.transform || 'none') as any,
+                    transform: element.rotateZ ? `rotateZ(${element.rotateZ}deg)` : 'none',
+                    textShadow: element.textShadow?.enabled 
+                      ? `${element.textShadow.offsetX}px ${element.textShadow.offsetY}px ${element.textShadow.blur}px ${element.textShadow.color}` 
+                      : 'none',
+                    WebkitTextStroke: element.outline?.enabled
+                      ? `${element.outline.width}px ${element.outline.color}`
+                      : 'none',
+                    ...(element.gradient?.enabled && {
+                      background: `linear-gradient(${element.gradient.direction}, ${element.gradient.startColor}, ${element.gradient.endColor})`,
+                      WebkitBackgroundClip: 'text',
+                      backgroundClip: 'text',
+                    }),
                   }}
                 >
                   {element.content}

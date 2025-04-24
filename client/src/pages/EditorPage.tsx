@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import ReferenceImagesPanel from "@/components/ReferenceImagesPanel";
 import ThumbnailEditor from "@/components/ThumbnailEditor";
 import EditorTools from "@/components/EditorTools";
@@ -9,7 +9,9 @@ import StickersPanel from "@/components/StickersPanel";
 import TemplateLibrary, { ThumbnailTemplate } from "@/components/TemplateLibrary";
 import ThumbnailChecklist from "@/components/ThumbnailChecklist";
 import { useToast } from "@/hooks/use-toast";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useMutation } from "@tanstack/react-query";
+import { apiRequest, queryClient } from "@/lib/queryClient";
+import { InsufficientPointsDialog } from "@/components/InsufficientPointsDialog";
 import { StickerElement } from "@/hooks/useStickerEditor";
 
 export interface TextElement {
@@ -88,6 +90,9 @@ export default function EditorPage() {
 
   const [selectedElement, setSelectedElement] = useState<TextElement | null>(null);
   const [selectedSticker, setSelectedSticker] = useState<StickerElement | null>(null);
+  
+  // State for insufficient points modal
+  const [isPointsModalOpen, setIsPointsModalOpen] = useState(false);
 
   // Fetch stock categories
   const { data: stockCategories = [] } = useQuery<any[]>({
@@ -436,9 +441,133 @@ export default function EditorPage() {
       description: `The "${template.name}" template has been applied.`,
     });
   };
+  
+  // Save thumbnail mutation
+  const saveThumbnailMutation = useMutation({
+    mutationFn: async () => {
+      const response = await apiRequest("POST", "/api/thumbnails", currentThumbnail);
+      return await response.json();
+    },
+    onSuccess: (data) => {
+      toast({
+        title: "Thumbnail Saved",
+        description: "Your thumbnail has been saved successfully.",
+      });
+      queryClient.invalidateQueries({ queryKey: ["/api/user/thumbnails"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/user"] });
+    },
+    onError: (error: any) => {
+      console.error("Save error:", error);
+      // Check for specific error messages
+      if (error.message && (
+        error.message.includes("Insufficient points") || 
+        error.message.includes("403") || 
+        error.message.toLowerCase().includes("out of points")
+      )) {
+        setIsPointsModalOpen(true);
+      } else {
+        toast({
+          title: "Save Failed",
+          description: "Out of points! Purchase more to save thumbnails.",
+          variant: "destructive",
+        });
+      }
+    },
+  });
+  
+  // Handle save thumbnail
+  const handleSaveThumbnail = () => {
+    if (!currentThumbnail.imageUrl) {
+      toast({
+        title: "Cannot Save",
+        description: "Please select an image before saving.",
+        variant: "destructive",
+      });
+      return;
+    }
+    
+    saveThumbnailMutation.mutate();
+  };
+  
+  // Export thumbnail mutation
+  const exportThumbnailMutation = useMutation({
+    mutationFn: async () => {
+      const response = await apiRequest("POST", "/api/thumbnails/export", {
+        imageUrl: currentThumbnail.imageUrl,
+        elements: currentThumbnail.elements,
+        filters: currentThumbnail.filters,
+      });
+      
+      // Get filename from response
+      const contentDisposition = response.headers.get("Content-Disposition");
+      let filename = "thumbnail.png";
+      if (contentDisposition) {
+        const filenameMatch = contentDisposition.match(/filename="?(.+?)"?$/);
+        if (filenameMatch && filenameMatch[1]) {
+          filename = filenameMatch[1];
+        }
+      }
+      
+      const blob = await response.blob();
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = filename;
+      document.body.appendChild(a);
+      a.click();
+      window.URL.revokeObjectURL(url);
+      document.body.removeChild(a);
+      
+      return { success: true };
+    },
+    onSuccess: () => {
+      toast({
+        title: "Export Complete",
+        description: "Your thumbnail has been downloaded.",
+      });
+      queryClient.invalidateQueries({ queryKey: ["/api/user"] });
+    },
+    onError: (error: any) => {
+      console.error("Export error:", error);
+      // Check for specific error messages
+      if (error.message && (
+        error.message.includes("Insufficient points") || 
+        error.message.includes("403") || 
+        error.message.toLowerCase().includes("out of points")
+      )) {
+        setIsPointsModalOpen(true);
+      } else {
+        toast({
+          title: "Export Failed",
+          description: "Out of points! Purchase more to export thumbnails.",
+          variant: "destructive",
+        });
+      }
+    },
+  });
+  
+  // Handle export thumbnail
+  const handleExportThumbnail = () => {
+    if (!currentThumbnail.imageUrl) {
+      toast({
+        title: "Cannot Export",
+        description: "Please select an image before exporting.",
+        variant: "destructive",
+      });
+      return;
+    }
+    
+    exportThumbnailMutation.mutate();
+  };
 
   return (
     <div className="bg-background">
+      {/* Insufficient Points Dialog */}
+      <InsufficientPointsDialog 
+        open={isPointsModalOpen} 
+        onOpenChange={setIsPointsModalOpen} 
+      />
+      
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="grid grid-cols-1 lg:grid-cols-10 gap-8">
           {/* Main editor */}
@@ -480,6 +609,25 @@ export default function EditorPage() {
                 
                 <div className="mt-6">
                   <PreviewSection thumbnailData={currentThumbnail} />
+                </div>
+                
+                {/* Action buttons */}
+                <div className="flex justify-end gap-4 mt-4">
+                  <button
+                    onClick={handleSaveThumbnail}
+                    disabled={saveThumbnailMutation.isPending}
+                    className="px-4 py-2 bg-primary text-white rounded-md font-medium flex items-center hover:bg-primary/90"
+                  >
+                    {saveThumbnailMutation.isPending ? 'Saving...' : 'Save Thumbnail'}
+                  </button>
+                  
+                  <button
+                    onClick={handleExportThumbnail}
+                    disabled={exportThumbnailMutation.isPending}
+                    className="px-4 py-2 bg-secondary text-secondary-foreground rounded-md font-medium flex items-center hover:bg-secondary/90"
+                  >
+                    {exportThumbnailMutation.isPending ? 'Exporting...' : 'Download Thumbnail'}
+                  </button>
                 </div>
                 
                 {/* Recent Thumbnails */}

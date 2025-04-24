@@ -159,6 +159,9 @@ export default function ThumbnailEditor({
         // Call the API to use a point first
         const usePointsResponse = await apiRequest('POST', '/api/use-points', {});
         if (!usePointsResponse.ok) {
+          const responseData = await usePointsResponse.json();
+          console.log('Use points error:', responseData);
+          
           if (usePointsResponse.status === 403) {
             setInsufficientPointsOpen(true);
             throw new Error("Insufficient points");
@@ -168,8 +171,25 @@ export default function ThumbnailEditor({
         
         // If point usage succeeded, save the thumbnail
         const response = await apiRequest('POST', '/api/thumbnails', thumbnailData);
+        
+        if (!response.ok) {
+          const responseData = await response.json();
+          console.log('Save thumbnail error:', responseData);
+          
+          if (response.status === 403) {
+            setInsufficientPointsOpen(true);
+            throw new Error("Insufficient points");
+          }
+          throw new Error("Failed to save thumbnail");
+        }
+        
         return await response.json();
-      } catch (error) {
+      } catch (error: any) {
+        // Always show the insufficient points dialog for 403 errors
+        if (error.message === "Insufficient points") {
+          setInsufficientPointsOpen(true);
+        }
+        console.error('Save error:', error);
         throw error;
       }
     },
@@ -180,8 +200,12 @@ export default function ThumbnailEditor({
       });
     },
     onError: (error: any) => {
+      console.log('Save mutation error:', error.message);
+      
+      // Don't show another toast if we're showing the insufficient points dialog
       if (error.message === "Insufficient points") {
-        // Already handled by opening the dialog
+        // Make sure the dialog is open
+        setInsufficientPointsOpen(true);
         return;
       }
       

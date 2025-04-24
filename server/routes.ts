@@ -203,8 +203,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
   
   // Get current user
-  app.get('/api/user', authenticate, (req: AuthRequest, res) => {
-    res.json(req.user);
+  app.get('/api/user', authenticate, async (req: AuthRequest, res) => {
+    // Get full user data from storage to ensure we have the correct points
+    const fullUser = await storage.getUser(req.user.id);
+    
+    // Make sure points field is explicitly set to 1 for new users if it's undefined
+    if (fullUser && (fullUser.points === undefined || fullUser.points === null)) {
+      fullUser.points = 1; // Default for new users
+      await storage.updateUser(fullUser.id, { points: 1 });
+    }
+    
+    res.json(fullUser || req.user);
   });
   
   // ===== POINT SYSTEM ROUTES =====
@@ -465,6 +474,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Check if user has enough points to save a thumbnail
       const user = await storage.getUser(req.user.id);
       
+      // Fix for missing points - set to 1 for new users
+      if (user && (user.points === undefined || user.points === null)) {
+        await storage.updateUser(user.id, { points: 1 });
+        user.points = 1; // Update local variable
+      }
+      
       if (!user || user.points < 1) {
         return res.status(403).json({ 
           error: "Insufficient points", 
@@ -530,6 +545,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       // Check if user has enough points
       const user = await storage.getUser(req.user.id);
+      
+      // Fix for missing points - set to 1 for new users
+      if (user && (user.points === undefined || user.points === null)) {
+        await storage.updateUser(user.id, { points: 1 });
+        user.points = 1; // Update local variable
+      }
+      
       if (!user || user.points < 1) {
         return res.status(403).json({ 
           error: "Insufficient points", 

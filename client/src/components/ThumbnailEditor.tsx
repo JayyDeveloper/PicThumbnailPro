@@ -90,13 +90,7 @@ export default function ThumbnailEditor({
       return;
     }
 
-    // Check if user has enough points
-    if (!userData || userData.points < 1) {
-      console.log("Client-side check: Insufficient points for download", userData?.points);
-      setInsufficientPointsOpen(true);
-      return;
-    }
-
+    // We'll let the server handle the points check
     try {
       const token = localStorage.getItem('token');
       console.log("Attempting export with token:", token ? "Token exists" : "No token");
@@ -183,27 +177,9 @@ export default function ThumbnailEditor({
   // Save thumbnail mutation
   const saveMutation = useMutation({
     mutationFn: async () => {
-      // Check points before saving
-      if (!checkPointsBeforeAction()) {
-        throw new Error("Insufficient points");
-      }
-      
-      // Use points and save thumbnail
+      // Use points and save thumbnail directly
       try {
-        // Call the API to use a point first
-        const usePointsResponse = await apiRequest('POST', '/api/use-points', {});
-        if (!usePointsResponse.ok) {
-          const responseData = await usePointsResponse.json();
-          console.log('Use points error:', responseData);
-          
-          if (usePointsResponse.status === 403) {
-            setInsufficientPointsOpen(true);
-            throw new Error("Insufficient points");
-          }
-          throw new Error("Failed to use points");
-        }
-        
-        // If point usage succeeded, save the thumbnail
+        // We'll directly call the save thumbnail API which will handle points internally
         const response = await apiRequest('POST', '/api/thumbnails', thumbnailData);
         
         if (!response.ok) {

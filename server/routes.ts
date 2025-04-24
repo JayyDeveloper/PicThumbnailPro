@@ -23,6 +23,7 @@ interface AuthRequest extends Request {
     id: number;
     username: string;
     email: string;
+    points?: number; // Add points field to user object
   };
   file?: any; // For multer file uploads
 }
@@ -101,17 +102,25 @@ function authenticate(req: AuthRequest, res: Response, next: NextFunction) {
       return res.status(401).json({ error: 'Invalid token' });
     }
     
+    console.log(`Authentication for user ID: ${userId}`);
+    
     storage.getUser(userId)
       .then(user => {
         if (!user) {
+          console.log(`Authentication failed: User not found with ID ${userId}`);
           return res.status(401).json({ error: 'User not found' });
         }
         
+        // Set all user data including points
         req.user = {
-          id: user.id,
+          id: user.id,  // Make sure ID is set correctly
           username: user.username,
-          email: user.email
+          email: user.email,
+          points: user.points ?? 1 // Default to 1 point for new users
         };
+        
+        // Log user info for debugging
+        console.log(`Authentication successful. User data: ${JSON.stringify(req.user)}`);
         
         next();
       })
@@ -204,6 +213,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
   
   // Get current user
   app.get('/api/user', authenticate, async (req: AuthRequest, res) => {
+    if (!req.user) {
+      return res.status(401).json({ error: 'Unauthorized' });
+    }
+    
     // Get full user data from storage to ensure we have the correct points
     const fullUser = await storage.getUser(req.user.id);
     
@@ -315,14 +328,27 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       if (!req.user) return res.status(401).json({ error: 'Unauthorized' });
       
+      console.log(`Use-points request from user ID: ${req.user.id}`);
+      
       // Get user
       const user = await storage.getUser(req.user.id);
       if (!user) {
+        console.log(`User not found with ID: ${req.user.id}`);
         return res.status(404).json({ error: 'User not found' });
+      }
+      
+      console.log(`User points before check: ${JSON.stringify(user.points)}, type: ${typeof user.points}`);
+      
+      // Fix for missing points - ensure new users have 1 point
+      if (user.points === undefined || user.points === null) {
+        console.log(`Setting default 1 point for user: ${user.id}`);
+        await storage.updateUser(user.id, { points: 1 });
+        user.points = 1; // Update local variable
       }
       
       // Check if user has points
       if (user.points < 1) {
+        console.log(`Insufficient points for user ${user.id}: ${user.points}`);
         return res.status(403).json({ 
           error: 'Insufficient points', 
           pointsRequired: 1,

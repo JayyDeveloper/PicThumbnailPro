@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useLocation } from "wouter";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, queryClient } from "@tanstack/react-query";
 import { useAuth } from "@/hooks/use-auth";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
@@ -9,7 +9,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Separator } from "@/components/ui/separator";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Sparkles, History, Plus, Image, LogOut, Edit } from "lucide-react";
+import { Sparkles, History, Plus, Image, LogOut, Edit, RefreshCw } from "lucide-react";
 import { Link } from "wouter";
 
 export default function AccountPage() {
@@ -78,7 +78,15 @@ export default function AccountPage() {
                 <h3 className="text-sm font-medium text-gray-500">Available Points</h3>
                 <div className="mt-1 flex items-center">
                   <Sparkles className="h-5 w-5 text-yellow-500 mr-1.5" />
-                  <span className="text-2xl font-bold">{user.points}</span>
+                  <span className="text-2xl font-bold">{user.points || 0}</span>
+                </div>
+                <div className="mt-1 text-xs text-muted-foreground">
+                  {user.points === 0 ? 
+                    "You're out of points! Purchase more to continue creating thumbnails." : 
+                    user.points === 1 ? 
+                    "You have 1 point remaining - enough for 1 more thumbnail." : 
+                    `You have ${user.points} points - enough for ${user.points} more thumbnails.`
+                  }
                 </div>
                 <Button variant="outline" size="sm" className="w-full mt-2" asChild>
                   <Link href="/pricing">

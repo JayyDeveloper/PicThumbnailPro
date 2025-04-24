@@ -1,9 +1,9 @@
 import { useEffect, useState } from "react";
 import { useLocation } from "wouter";
-import { useQuery, queryClient } from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";
 import { useAuth } from "@/hooks/use-auth";
 import { useToast } from "@/hooks/use-toast";
-import { apiRequest } from "@/lib/queryClient";
+import { apiRequest, queryClient } from "@/lib/queryClient";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -26,7 +26,11 @@ export default function AccountPage() {
   }, [user, setLocation]);
 
   // Fetch user's thumbnails
-  const { data: thumbnails = [], isLoading: thumbnailsLoading } = useQuery({
+  const { 
+    data: thumbnails = [], 
+    isLoading: thumbnailsLoading,
+    refetch: refetchThumbnails
+  } = useQuery({
     queryKey: ["/api/user/thumbnails"],
     queryFn: async () => {
       const res = await apiRequest("GET", "/api/user/thumbnails");
@@ -34,6 +38,14 @@ export default function AccountPage() {
     },
     enabled: !!user,
   });
+  
+  // Refetch data when component mounts or is revisited
+  useEffect(() => {
+    if (user) {
+      refetchThumbnails();
+      queryClient.invalidateQueries({ queryKey: ["/api/user"] });
+    }
+  }, [user, refetchThumbnails]);
 
   // Fetch user's transactions
   const { data: transactions = [], isLoading: transactionsLoading } = useQuery({
@@ -128,12 +140,29 @@ export default function AccountPage() {
                 <div>
                   <div className="flex justify-between items-center mb-4">
                     <h3 className="text-lg font-semibold">Your Created Thumbnails</h3>
-                    <Button asChild>
-                      <Link href="/editor">
-                        <Plus className="h-4 w-4 mr-1" />
-                        Create New
-                      </Link>
-                    </Button>
+                    <div className="flex space-x-2">
+                      <Button 
+                        variant="outline" 
+                        size="sm" 
+                        onClick={() => {
+                          refetchThumbnails();
+                          queryClient.invalidateQueries({ queryKey: ["/api/user"] });
+                          toast({
+                            title: "Refreshed",
+                            description: "Your thumbnails have been refreshed",
+                          });
+                        }}
+                      >
+                        <RefreshCw className="h-4 w-4 mr-1.5" />
+                        Refresh
+                      </Button>
+                      <Button asChild>
+                        <Link href="/editor">
+                          <Plus className="h-4 w-4 mr-1" />
+                          Create New
+                        </Link>
+                      </Button>
+                    </div>
                   </div>
                   
                   {thumbnailsLoading ? (

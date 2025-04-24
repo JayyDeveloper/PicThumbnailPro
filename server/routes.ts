@@ -461,6 +461,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
       if (!req.user) {
         return res.status(401).json({ error: "Unauthorized" });
       }
+      
+      // Check if user has enough points to save a thumbnail
+      const user = await storage.getUser(req.user.id);
+      
+      if (!user || user.points < 1) {
+        return res.status(403).json({ 
+          error: "Insufficient points", 
+          pointsRequired: 1,
+          currentPoints: user?.points || 0
+        });
+      }
 
       // Validate the request body
       const thumbnailData = insertThumbnailSchema.parse({
@@ -470,6 +481,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       // Save to storage
       const thumbnail = await storage.createThumbnail(thumbnailData);
+      
+      // Deduct a point and record the transaction
+      await storage.updateUserPoints(req.user.id, -1);
+      await storage.createPointTransaction({
+        userId: req.user.id,
+        points: -1,
+        description: "Saved thumbnail: " + thumbnailData.name
+      });
+      
       res.status(201).json(thumbnail);
     } catch (error) {
       if (error instanceof ZodError) {

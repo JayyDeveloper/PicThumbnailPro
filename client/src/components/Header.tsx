@@ -27,12 +27,12 @@ export default function Header() {
   };
 
   return (
-    <header className="bg-white shadow-sm">
+    <header className="bg-background border-b">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex justify-between items-center">
         <Link href="/">
           <div className="flex items-center space-x-2 cursor-pointer">
             <Film className="h-6 w-6 text-primary" />
-            <h1 className="text-xl font-semibold text-gray-900">ThumbnailCraft</h1>
+            <h1 className="text-xl font-semibold text-foreground">ThumbnailCraft</h1>
           </div>
         </Link>
         <div className="flex space-x-3">

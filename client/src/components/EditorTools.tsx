@@ -188,12 +188,12 @@ export default function EditorTools({
     <div className="space-y-6">
       {/* Text Customization Panel */}
       {selectedElement && (
-        <div className="bg-white rounded-lg shadow-sm p-4 mb-6">
-          <h2 className="text-lg font-semibold mb-4">Text Customization</h2>
+        <div className="bg-card rounded-lg shadow-sm p-4 mb-6 border dark:border-border">
+          <h2 className="text-lg font-semibold mb-4 text-foreground">Text Customization</h2>
           
           {/* Text Content */}
           <div className="mb-4">
-            <Label htmlFor="text-content" className="block text-sm font-medium text-gray-700 mb-1">
+            <Label htmlFor="text-content" className="block text-sm font-medium text-foreground mb-1">
               Content
             </Label>
             <Textarea 
@@ -207,7 +207,7 @@ export default function EditorTools({
           
           {/* Font Selection */}
           <div className="mb-4">
-            <Label htmlFor="font-select" className="block text-sm font-medium text-gray-700 mb-1">
+            <Label htmlFor="font-select" className="block text-sm font-medium text-foreground mb-1">
               Font
             </Label>
             <Select 
@@ -234,7 +234,7 @@ export default function EditorTools({
           {/* Font Style Controls */}
           <div className="grid grid-cols-2 gap-4 mb-4">
             <div>
-              <Label htmlFor="font-size" className="block text-sm font-medium text-gray-700 mb-1">
+              <Label htmlFor="font-size" className="block text-sm font-medium text-foreground mb-1">
                 Size
               </Label>
               <div className="flex">
@@ -247,13 +247,13 @@ export default function EditorTools({
                   max={72}
                   className="w-full rounded-r-none"
                 />
-                <span className="inline-flex items-center px-3 py-2 border border-l-0 border-gray-300 bg-gray-50 text-gray-500 rounded-r-md">
+                <span className="inline-flex items-center px-3 py-2 border border-l-0 border-border bg-muted/50 text-muted-foreground rounded-r-md">
                   px
                 </span>
               </div>
             </div>
             <div>
-              <Label htmlFor="font-weight" className="block text-sm font-medium text-gray-700 mb-1">
+              <Label htmlFor="font-weight" className="block text-sm font-medium text-foreground mb-1">
                 Weight
               </Label>
               <Select 
@@ -332,7 +332,7 @@ export default function EditorTools({
           
           {/* Color Controls */}
           <div className="mb-4">
-            <Label className="block text-sm font-medium text-gray-700 mb-1">
+            <Label className="block text-sm font-medium text-foreground mb-1">
               Text Color
             </Label>
             <div className="grid grid-cols-6 gap-2">
@@ -350,11 +350,11 @@ export default function EditorTools({
           {/* Background Controls */}
           <div>
             <div className="flex justify-between items-center mb-1">
-              <Label className="block text-sm font-medium text-gray-700">
+              <Label className="block text-sm font-medium text-foreground">
                 Background
               </Label>
               <div className="flex items-center">
-                <span className="text-xs text-gray-500 mr-2">
+                <span className="text-xs text-muted-foreground mr-2">
                   Opacity: {selectedElement.backgroundOpacity}%
                 </span>
                 <Slider 
@@ -403,7 +403,7 @@ export default function EditorTools({
             {/* Shadow Tab */}
             <TabsContent value="shadow" className="space-y-3">
               <div className="flex items-center justify-between">
-                <Label className="text-sm font-medium text-gray-700">Text Shadow</Label>
+                <Label className="text-sm font-medium text-foreground">Text Shadow</Label>
                 <Switch 
                   checked={selectedElement.textShadow?.enabled || false}
                   onCheckedChange={(checked) => {
@@ -500,7 +500,7 @@ export default function EditorTools({
             {/* Outline Tab */}
             <TabsContent value="outline" className="space-y-3">
               <div className="flex items-center justify-between">
-                <Label className="text-sm font-medium text-gray-700">Text Outline</Label>
+                <Label className="text-sm font-medium text-foreground">Text Outline</Label>
                 <Switch 
                   checked={selectedElement.outline?.enabled || false}
                   onCheckedChange={(checked) => {
@@ -559,7 +559,7 @@ export default function EditorTools({
             {/* Gradient Tab */}
             <TabsContent value="gradient" className="space-y-3">
               <div className="flex items-center justify-between">
-                <Label className="text-sm font-medium text-gray-700">Text Gradient</Label>
+                <Label className="text-sm font-medium text-foreground">Text Gradient</Label>
                 <Switch 
                   checked={selectedElement.gradient?.enabled || false}
                   onCheckedChange={(checked) => {
@@ -692,12 +692,12 @@ export default function EditorTools({
       )}
       
       {/* Image Adjustments Panel */}
-      <div className="bg-white rounded-lg shadow-sm p-4">
+      <div className="bg-card rounded-lg shadow-sm p-4 border dark:border-border">
         <h2 className="text-lg font-semibold mb-4">Image Adjustments</h2>
         
         {/* Filters */}
         <div className="mb-4">
-          <Label className="block text-sm font-medium text-gray-700 mb-2">
+          <Label className="block text-sm font-medium text-foreground mb-2">
             Filters
           </Label>
           <div className="grid grid-cols-3 gap-2 mb-2">
@@ -706,7 +706,7 @@ export default function EditorTools({
               className="p-2 h-auto flex flex-col items-center"
               onClick={() => handleFilterChange('Normal')}
             >
-              <div className="w-full h-12 bg-gray-200 rounded-md mb-1 overflow-hidden">
+              <div className="w-full h-12 bg-muted rounded-md mb-1 overflow-hidden">
                 {thumbnailData.imageUrl ? (
                   <img 
                     src={thumbnailData.imageUrl} 
@@ -714,7 +714,7 @@ export default function EditorTools({
                     className="w-full h-full object-cover"
                   />
                 ) : (
-                  <div className="w-full h-full bg-gray-300" />
+                  <div className="w-full h-full bg-slate-700" />
                 )}
               </div>
               <span className="text-xs">Normal</span>
@@ -724,7 +724,7 @@ export default function EditorTools({
               className="p-2 h-auto flex flex-col items-center"
               onClick={() => handleFilterChange('Muted')}
             >
-              <div className="w-full h-12 bg-gray-200 rounded-md mb-1 overflow-hidden">
+              <div className="w-full h-12 bg-muted rounded-md mb-1 overflow-hidden">
                 {thumbnailData.imageUrl ? (
                   <img 
                     src={thumbnailData.imageUrl} 
@@ -733,7 +733,7 @@ export default function EditorTools({
                     style={{ filter: 'saturate(50%)' }}
                   />
                 ) : (
-                  <div className="w-full h-full bg-gray-300" />
+                  <div className="w-full h-full bg-slate-700" />
                 )}
               </div>
               <span className="text-xs">Muted</span>
@@ -743,7 +743,7 @@ export default function EditorTools({
               className="p-2 h-auto flex flex-col items-center"
               onClick={() => handleFilterChange('Vibrant')}
             >
-              <div className="w-full h-12 bg-gray-200 rounded-md mb-1 overflow-hidden">
+              <div className="w-full h-12 bg-muted rounded-md mb-1 overflow-hidden">
                 {thumbnailData.imageUrl ? (
                   <img 
                     src={thumbnailData.imageUrl} 
@@ -752,7 +752,7 @@ export default function EditorTools({
                     style={{ filter: 'saturate(150%)' }}
                   />
                 ) : (
-                  <div className="w-full h-full bg-gray-300" />
+                  <div className="w-full h-full bg-slate-700" />
                 )}
               </div>
               <span className="text-xs">Vibrant</span>
@@ -764,7 +764,7 @@ export default function EditorTools({
               className="p-2 h-auto flex flex-col items-center"
               onClick={() => handleFilterChange('Dramatic')}
             >
-              <div className="w-full h-12 bg-gray-200 rounded-md mb-1 overflow-hidden">
+              <div className="w-full h-12 bg-muted rounded-md mb-1 overflow-hidden">
                 {thumbnailData.imageUrl ? (
                   <img 
                     src={thumbnailData.imageUrl} 
@@ -773,7 +773,7 @@ export default function EditorTools({
                     style={{ filter: 'contrast(140%) brightness(110%) saturate(120%)' }}
                   />
                 ) : (
-                  <div className="w-full h-full bg-gray-300" />
+                  <div className="w-full h-full bg-slate-700" />
                 )}
               </div>
               <span className="text-xs">Dramatic</span>
@@ -783,7 +783,7 @@ export default function EditorTools({
               className="p-2 h-auto flex flex-col items-center"
               onClick={() => handleFilterChange('Retro')}
             >
-              <div className="w-full h-12 bg-gray-200 rounded-md mb-1 overflow-hidden">
+              <div className="w-full h-12 bg-muted rounded-md mb-1 overflow-hidden">
                 {thumbnailData.imageUrl ? (
                   <img 
                     src={thumbnailData.imageUrl} 
@@ -792,7 +792,7 @@ export default function EditorTools({
                     style={{ filter: 'sepia(60%) hue-rotate(320deg) saturate(120%)' }}
                   />
                 ) : (
-                  <div className="w-full h-full bg-gray-300" />
+                  <div className="w-full h-full bg-slate-700" />
                 )}
               </div>
               <span className="text-xs">Retro</span>
@@ -802,7 +802,7 @@ export default function EditorTools({
               className="p-2 h-auto flex flex-col items-center"
               onClick={() => handleFilterChange('Neon')}
             >
-              <div className="w-full h-12 bg-gray-200 rounded-md mb-1 overflow-hidden">
+              <div className="w-full h-12 bg-muted rounded-md mb-1 overflow-hidden">
                 {thumbnailData.imageUrl ? (
                   <img 
                     src={thumbnailData.imageUrl} 
@@ -811,7 +811,7 @@ export default function EditorTools({
                     style={{ filter: 'brightness(110%) contrast(120%) saturate(180%) hue-rotate(20deg)' }}
                   />
                 ) : (
-                  <div className="w-full h-full bg-gray-300" />
+                  <div className="w-full h-full bg-slate-700" />
                 )}
               </div>
               <span className="text-xs">Neon</span>
@@ -823,7 +823,7 @@ export default function EditorTools({
               className="p-2 h-auto flex flex-col items-center"
               onClick={() => handleFilterChange('Noir')}
             >
-              <div className="w-full h-12 bg-gray-200 rounded-md mb-1 overflow-hidden">
+              <div className="w-full h-12 bg-muted rounded-md mb-1 overflow-hidden">
                 {thumbnailData.imageUrl ? (
                   <img 
                     src={thumbnailData.imageUrl} 
@@ -832,7 +832,7 @@ export default function EditorTools({
                     style={{ filter: 'grayscale(100%) contrast(120%) brightness(90%)' }}
                   />
                 ) : (
-                  <div className="w-full h-full bg-gray-300" />
+                  <div className="w-full h-full bg-slate-700" />
                 )}
               </div>
               <span className="text-xs">Noir</span>
@@ -842,7 +842,7 @@ export default function EditorTools({
               className="p-2 h-auto flex flex-col items-center"
               onClick={() => handleFilterChange('Vintage')}
             >
-              <div className="w-full h-12 bg-gray-200 rounded-md mb-1 overflow-hidden">
+              <div className="w-full h-12 bg-muted rounded-md mb-1 overflow-hidden">
                 {thumbnailData.imageUrl ? (
                   <img 
                     src={thumbnailData.imageUrl} 
@@ -851,7 +851,7 @@ export default function EditorTools({
                     style={{ filter: 'sepia(40%) brightness(90%) contrast(85%) saturate(110%) hue-rotate(350deg)' }}
                   />
                 ) : (
-                  <div className="w-full h-full bg-gray-300" />
+                  <div className="w-full h-full bg-slate-700" />
                 )}
               </div>
               <span className="text-xs">Vintage</span>
@@ -861,7 +861,7 @@ export default function EditorTools({
               className="p-2 h-auto flex flex-col items-center"
               onClick={() => handleFilterChange('Blueprint')}
             >
-              <div className="w-full h-12 bg-gray-200 rounded-md mb-1 overflow-hidden">
+              <div className="w-full h-12 bg-muted rounded-md mb-1 overflow-hidden">
                 {thumbnailData.imageUrl ? (
                   <img 
                     src={thumbnailData.imageUrl} 
@@ -870,7 +870,7 @@ export default function EditorTools({
                     style={{ filter: 'brightness(100%) contrast(100%) grayscale(100%) invert(90%) sepia(100%) hue-rotate(180deg)' }}
                   />
                 ) : (
-                  <div className="w-full h-full bg-gray-300" />
+                  <div className="w-full h-full bg-slate-700" />
                 )}
               </div>
               <span className="text-xs">Blueprint</span>
@@ -880,13 +880,13 @@ export default function EditorTools({
         
         {/* Adjustments */}
         <div>
-          <Label className="block text-sm font-medium text-gray-700 mb-3">
+          <Label className="block text-sm font-medium text-foreground mb-3">
             Adjustments
           </Label>
           
           {/* Brightness */}
           <div className="mb-3">
-            <div className="flex justify-between text-xs text-gray-500 mb-1">
+            <div className="flex justify-between text-xs text-muted-foreground mb-1">
               <span>Brightness</span>
               <span>{thumbnailData.filters.brightness}</span>
             </div>
@@ -902,7 +902,7 @@ export default function EditorTools({
           
           {/* Contrast */}
           <div className="mb-3">
-            <div className="flex justify-between text-xs text-gray-500 mb-1">
+            <div className="flex justify-between text-xs text-muted-foreground mb-1">
               <span>Contrast</span>
               <span>{thumbnailData.filters.contrast}</span>
             </div>
@@ -918,7 +918,7 @@ export default function EditorTools({
           
           {/* Saturation */}
           <div className="mb-3">
-            <div className="flex justify-between text-xs text-gray-500 mb-1">
+            <div className="flex justify-between text-xs text-muted-foreground mb-1">
               <span>Saturation</span>
               <span>{thumbnailData.filters.saturation}</span>
             </div>
@@ -934,7 +934,7 @@ export default function EditorTools({
           
           {/* Blur */}
           <div>
-            <div className="flex justify-between text-xs text-gray-500 mb-1">
+            <div className="flex justify-between text-xs text-muted-foreground mb-1">
               <span>Blur Background</span>
               <span>{thumbnailData.filters.blur}</span>
             </div>

@@ -96,7 +96,7 @@ export default function AccountPage() {
                   {!user.points || user.points === 0 ? 
                     "You're out of points! Purchase more to continue creating thumbnails." : 
                     user.points === 1 ? 
-                    "You have 1 point remaining - enough for 1 more thumbnail." : 
+                    "You have 1 free trial point remaining - enough for 1 more thumbnail." : 
                     `You have ${user.points} points - enough for ${user.points} more thumbnails.`
                   }
                 </div>

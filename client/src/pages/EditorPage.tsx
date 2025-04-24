@@ -9,10 +9,13 @@ import StickersPanel from "@/components/StickersPanel";
 import TemplateLibrary, { ThumbnailTemplate } from "@/components/TemplateLibrary";
 import ThumbnailChecklist from "@/components/ThumbnailChecklist";
 import { useToast } from "@/hooks/use-toast";
+import { useAuth } from "@/hooks/use-auth";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { InsufficientPointsDialog } from "@/components/InsufficientPointsDialog";
 import { StickerElement } from "@/hooks/useStickerEditor";
+import { Sparkles } from "lucide-react";
+import { Link } from "wouter";
 
 export interface TextElement {
   id: string;
@@ -70,6 +73,7 @@ export interface ThumbnailData {
 
 export default function EditorPage() {
   const { toast } = useToast();
+  const { user } = useAuth();
 
   const [currentThumbnail, setCurrentThumbnail] = useState<ThumbnailData>({
     imageUrl: "",
@@ -612,22 +616,32 @@ export default function EditorPage() {
                 </div>
                 
                 {/* Action buttons */}
-                <div className="flex justify-end gap-4 mt-4">
-                  <button
-                    onClick={handleSaveThumbnail}
-                    disabled={saveThumbnailMutation.isPending}
-                    className="px-4 py-2 bg-primary text-white rounded-md font-medium flex items-center hover:bg-primary/90"
-                  >
-                    {saveThumbnailMutation.isPending ? 'Saving...' : 'Save Thumbnail'}
-                  </button>
+                <div className="flex justify-between items-center gap-4 mt-4">
+                  <div className="flex items-center">
+                    <Sparkles className="h-5 w-5 text-yellow-500 mr-1.5" />
+                    <span className="mr-1 font-medium">{user?.points || 0} available {user?.points === 1 ? 'point' : 'points'}</span>
+                    {user?.points === 1 && (
+                      <span className="text-xs text-muted-foreground">(Free trial)</span>
+                    )}
+                  </div>
                   
-                  <button
-                    onClick={handleExportThumbnail}
-                    disabled={exportThumbnailMutation.isPending}
-                    className="px-4 py-2 bg-secondary text-secondary-foreground rounded-md font-medium flex items-center hover:bg-secondary/90"
-                  >
-                    {exportThumbnailMutation.isPending ? 'Exporting...' : 'Download Thumbnail'}
-                  </button>
+                  <div className="flex gap-4">
+                    <button
+                      onClick={handleSaveThumbnail}
+                      disabled={saveThumbnailMutation.isPending}
+                      className="px-4 py-2 bg-primary text-white rounded-md font-medium flex items-center hover:bg-primary/90"
+                    >
+                      {saveThumbnailMutation.isPending ? 'Saving...' : 'Save Thumbnail'}
+                    </button>
+                    
+                    <button
+                      onClick={handleExportThumbnail}
+                      disabled={exportThumbnailMutation.isPending}
+                      className="px-4 py-2 bg-secondary text-secondary-foreground rounded-md font-medium flex items-center hover:bg-secondary/90"
+                    >
+                      {exportThumbnailMutation.isPending ? 'Exporting...' : 'Download Thumbnail'}
+                    </button>
+                  </div>
                 </div>
                 
                 {/* Recent Thumbnails */}

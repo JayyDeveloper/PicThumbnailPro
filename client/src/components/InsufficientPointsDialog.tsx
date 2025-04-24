@@ -1,5 +1,5 @@
 import { Link } from "wouter";
-import { Sparkles } from "lucide-react";
+import { Sparkles, ShoppingBag } from "lucide-react";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -29,8 +29,8 @@ export function InsufficientPointsDialog({
             Out of Points
           </AlertDialogTitle>
           <AlertDialogDescription className="text-base text-muted-foreground">
-            You need 1 point to download or save a thumbnail. 
-            Purchase a point package to continue creating amazing thumbnails.
+            <p>You need 1 point to download or save a thumbnail.</p>
+            <p className="mt-1">Each new user gets 1 free trial point. Additional points can be purchased in the packages below.</p>
           </AlertDialogDescription>
         </AlertDialogHeader>
         <div className="mt-4 p-4 rounded-md bg-secondary/50 border border-border">
@@ -59,8 +59,12 @@ export function InsufficientPointsDialog({
         <AlertDialogFooter className="mt-4">
           <AlertDialogCancel>Cancel</AlertDialogCancel>
           <AlertDialogAction asChild>
-            <Link href="/pricing" className="bg-primary text-primary-foreground hover:bg-primary/90 h-10 px-4 py-2 rounded-md">
-              View Pricing Plans
+            <Link 
+              href="/pricing" 
+              className="bg-primary text-primary-foreground hover:bg-primary/90 h-10 px-4 py-2 rounded-md flex items-center"
+            >
+              <Sparkles className="h-4 w-4 mr-2" />
+              Get More Points
             </Link>
           </AlertDialogAction>
         </AlertDialogFooter>

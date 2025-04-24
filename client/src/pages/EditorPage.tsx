@@ -15,7 +15,7 @@ import { apiRequest, queryClient } from "@/lib/queryClient";
 import { InsufficientPointsDialog } from "@/components/InsufficientPointsDialog";
 import { StickerElement } from "@/hooks/useStickerEditor";
 import { Sparkles } from "lucide-react";
-import { Link } from "wouter";
+import { Link, Redirect } from "wouter";
 
 export interface TextElement {
   id: string;
@@ -97,6 +97,19 @@ export default function EditorPage() {
   
   // State for insufficient points modal
   const [isPointsModalOpen, setIsPointsModalOpen] = useState(false);
+  
+  // State for authentication check and redirect
+  const [shouldRedirectToAuth, setShouldRedirectToAuth] = useState(false);
+  
+  // Check if user is authenticated
+  useEffect(() => {
+    if (user === null) {
+      console.log("Authentication check: User is not authenticated, redirecting to auth page");
+      setShouldRedirectToAuth(true);
+    } else {
+      console.log("Authentication check: User is authenticated", user);
+    }
+  }, [user]);
 
   // Fetch stock categories
   const { data: stockCategories = [] } = useQuery<any[]>({
@@ -564,6 +577,11 @@ export default function EditorPage() {
     exportThumbnailMutation.mutate();
   };
 
+  // If user should be redirected to auth page, do it
+  if (shouldRedirectToAuth) {
+    return <Redirect to="/auth" />;
+  }
+  
   return (
     <div className="bg-background">
       {/* Insufficient Points Dialog */}

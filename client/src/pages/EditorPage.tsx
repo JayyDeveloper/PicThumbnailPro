@@ -382,23 +382,23 @@ export default function EditorPage() {
   };
 
   return (
-    <div className="bg-gray-50">
+    <div className="bg-background">
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="grid grid-cols-1 lg:grid-cols-10 gap-8">
           {/* Main editor */}
           <div className="lg:col-span-7">
             {!currentThumbnail.imageUrl ? (
               <>
-                <div className="bg-white rounded-lg shadow p-6 mb-6">
-                  <h2 className="text-xl font-semibold mb-4">Upload or Select an Image</h2>
+                <div className="bg-card rounded-lg shadow-sm p-6 mb-6 dark:border dark:border-border">
+                  <h2 className="text-xl font-semibold mb-4 text-foreground">Upload or Select an Image</h2>
                   <ReferenceImagesPanel 
                     onImageSelected={handleImageSelected}
                     stockCategories={stockCategories}
                   />
                 </div>
                 
-                <div className="bg-white rounded-lg shadow p-6">
-                  <h2 className="text-xl font-semibold mb-4">Or Choose from Template Library</h2>
+                <div className="bg-card rounded-lg shadow-sm p-6 dark:border dark:border-border">
+                  <h2 className="text-xl font-semibold mb-4 text-foreground">Or Choose from Template Library</h2>
                   <TemplateLibrary onSelectTemplate={handleTemplateSelect} />
                 </div>
               </>

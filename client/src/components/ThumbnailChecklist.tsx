@@ -91,10 +91,10 @@ export default function ThumbnailChecklist() {
   const progressPercentage = (completedItems / checklist.length) * 100;
 
   return (
-    <Card className="shadow-sm">
+    <Card className="shadow-sm bg-card border-border">
       <CardHeader className="p-4 pb-2 flex flex-row items-center justify-between">
-        <CardTitle className="text-lg flex items-center">
-          <CheckCircle className="h-5 w-5 mr-2 text-green-500" />
+        <CardTitle className="text-lg flex items-center text-foreground">
+          <CheckCircle className="h-5 w-5 mr-2 text-emerald-500" />
           Thumbnail Best Practices
         </CardTitle>
         <Button variant="ghost" size="sm" onClick={toggleChecklist} className="h-8 w-8 p-0">
@@ -109,13 +109,13 @@ export default function ThumbnailChecklist() {
       {expanded && (
         <CardContent className="p-4 pt-2">
           <div className="flex items-center mb-3">
-            <div className="w-full bg-gray-200 rounded-full h-2.5 dark:bg-gray-700 mr-2">
+            <div className="w-full bg-muted rounded-full h-2.5 mr-2">
               <div 
-                className="bg-green-500 h-2.5 rounded-full" 
+                className="bg-emerald-500 h-2.5 rounded-full" 
                 style={{ width: `${progressPercentage}%` }}
               ></div>
             </div>
-            <span className="text-sm text-gray-500">{completedItems}/{checklist.length}</span>
+            <span className="text-sm text-muted-foreground">{completedItems}/{checklist.length}</span>
           </div>
           
           <Accordion type="multiple" className="space-y-2">
@@ -123,7 +123,7 @@ export default function ThumbnailChecklist() {
               <AccordionItem 
                 key={item.id} 
                 value={item.id}
-                className="border px-3 py-1 rounded-md bg-gray-50"
+                className="border px-3 py-1 rounded-md bg-muted/30 dark:border-border"
               >
                 <div className="flex items-center">
                   <Checkbox 
@@ -134,20 +134,20 @@ export default function ThumbnailChecklist() {
                   />
                   <Label 
                     htmlFor={item.id} 
-                    className={`text-sm flex-1 ${item.checked ? 'line-through text-gray-400' : 'text-gray-700'}`}
+                    className={`text-sm flex-1 ${item.checked ? 'line-through text-muted-foreground' : 'text-foreground'}`}
                   >
                     {item.text}
                   </Label>
                   <AccordionTrigger className="ml-auto" />
                 </div>
-                <AccordionContent className="pl-6 pr-2 text-sm text-gray-600">
+                <AccordionContent className="pl-6 pr-2 text-sm text-muted-foreground">
                   {item.description}
                 </AccordionContent>
               </AccordionItem>
             ))}
           </Accordion>
           
-          <div className="mt-3 text-sm text-gray-500 flex items-center">
+          <div className="mt-3 text-sm text-muted-foreground flex items-center">
             <Info className="h-4 w-4 mr-1" />
             <span>Following these practices can increase engagement by up to 40%</span>
           </div>

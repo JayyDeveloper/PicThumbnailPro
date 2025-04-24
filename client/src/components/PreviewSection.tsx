@@ -65,10 +65,10 @@ export default function PreviewSection({ thumbnailData }: PreviewSectionProps) {
   };
 
   return (
-    <div className="bg-white rounded-lg shadow-sm p-4">
-      <h2 className="text-lg font-semibold mb-4">Preview</h2>
+    <div className="bg-card rounded-lg shadow-sm p-4 border dark:border-border">
+      <h2 className="text-lg font-semibold mb-4 text-foreground">Preview</h2>
       
-      <div className="bg-gray-900 p-4 rounded-lg">
+      <div className="bg-black p-4 rounded-lg">
         <div className="max-w-md mx-auto">
           {/* YouTube Preview */}
           <div className="relative aspect-video rounded-lg overflow-hidden">
@@ -80,8 +80,8 @@ export default function PreviewSection({ thumbnailData }: PreviewSectionProps) {
                 style={getFilterStyle()}
               />
             ) : (
-              <div className="absolute inset-0 bg-gray-800 flex items-center justify-center">
-                <p className="text-gray-400">No image selected</p>
+              <div className="absolute inset-0 bg-muted dark:bg-slate-800 flex items-center justify-center">
+                <p className="text-muted-foreground">No image selected</p>
               </div>
             )}
             
@@ -181,10 +181,10 @@ export default function PreviewSection({ thumbnailData }: PreviewSectionProps) {
       </div>
       
       <div className="mt-4 flex justify-between items-center">
-        <Button variant="ghost" size="sm" className="text-sm text-gray-500 hover:text-gray-700 flex items-center">
+        <Button variant="ghost" size="sm" className="text-sm text-muted-foreground hover:text-foreground flex items-center">
           <ExternalLink className="h-4 w-4 mr-1" /> Preview in YouTube Studio
         </Button>
-        <Button size="sm" className="px-4 py-2 bg-primary hover:bg-blue-600 text-white rounded-md text-sm">
+        <Button size="sm" className="px-4 py-2 bg-primary hover:bg-primary/80 text-primary-foreground rounded-md text-sm">
           Export for YouTube
         </Button>
       </div>

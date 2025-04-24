@@ -642,6 +642,46 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Debug login endpoint for testing insufficient points (DEVELOPMENT ONLY)
+  app.post("/api/debug/login-with-points", async (req, res) => {
+    try {
+      const { username, points } = req.body;
+      
+      if (!username || points === undefined) {
+        return res.status(400).json({ error: "Username and points are required" });
+      }
+      
+      // Find or create user
+      let user = await storage.getUserByUsername(username);
+      
+      if (!user) {
+        // Create a test user if it doesn't exist
+        user = await storage.createUser({
+          username,
+          email: `${username}@example.com`,
+          password: await hashPassword("password123"),
+          points: points
+        });
+        console.log(`Created test user ${username} with ${points} points`);
+      } else {
+        // Update existing user's points
+        user = await storage.updateUser(user.id, { points });
+        console.log(`Updated test user ${username} to have ${points} points`);
+      }
+      
+      // Return user without password
+      const { password: _, ...userWithoutPassword } = user;
+      res.json({
+        user: userWithoutPassword,
+        token: String(user.id),
+        message: `Logged in with ${points} points`
+      });
+    } catch (error) {
+      console.error('Debug login error:', error);
+      res.status(500).json({ error: 'Login failed' });
+    }
+  });
+
   // Debug endpoint to check user points (DEVELOPMENT ONLY)
   app.get("/api/debug/points/:userId", async (req, res) => {
     try {

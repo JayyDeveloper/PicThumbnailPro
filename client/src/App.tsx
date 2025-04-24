@@ -13,6 +13,31 @@ import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import { AuthProvider } from "@/hooks/use-auth";
 import { ThemeProvider } from "@/components/ThemeProvider";
+import { useEffect } from "react";
+
+function TokenSynchronizer() {
+  useEffect(() => {
+    // Ensure token consistency - copy from authToken to token if needed
+    const authToken = localStorage.getItem("authToken");
+    const token = localStorage.getItem("token");
+
+    if (authToken && !token) {
+      console.log("Synchronizing tokens: copying from authToken to token");
+      localStorage.setItem("token", authToken);
+    } else if (token && !authToken) {
+      console.log("Synchronizing tokens: copying from token to authToken");
+      localStorage.setItem("authToken", token);
+    }
+
+    // Log final token state after synchronization
+    console.log("Token state after sync: ", {
+      token: localStorage.getItem("token") ? "exists" : "missing",
+      authToken: localStorage.getItem("authToken") ? "exists" : "missing"
+    });
+  }, []);
+
+  return null;
+}
 
 function Router() {
   return (
@@ -39,6 +64,7 @@ function App() {
       <QueryClientProvider client={queryClient}>
         <TooltipProvider>
           <Toaster />
+          <TokenSynchronizer />
           <AuthProvider>
             <Router />
           </AuthProvider>

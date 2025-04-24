@@ -7,6 +7,7 @@ import RecentThumbnails from "@/components/RecentThumbnails";
 import EmojiTextStyleGenerator from "@/components/EmojiTextStyleGenerator";
 import StickersPanel from "@/components/StickersPanel";
 import TemplateLibrary, { ThumbnailTemplate } from "@/components/TemplateLibrary";
+import ThumbnailChecklist from "@/components/ThumbnailChecklist";
 import { useToast } from "@/hooks/use-toast";
 import { useQuery } from "@tanstack/react-query";
 import { StickerElement } from "@/hooks/useStickerEditor";
@@ -442,6 +443,8 @@ export default function EditorPage() {
                   thumbnailData={currentThumbnail}
                   onUpdateFilters={handleUpdateFilters}
                 />
+                
+                <ThumbnailChecklist />
                 
                 <EmojiTextStyleGenerator
                   selectedElement={selectedElement}

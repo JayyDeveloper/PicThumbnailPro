@@ -39,14 +39,17 @@ export async function apiRequest(
   url: string,
   data?: unknown | undefined,
 ): Promise<Response> {
-  // Get auth token from localStorage
-  const authToken = localStorage.getItem("authToken");
+  // Get auth token from localStorage (try both possible keys)
+  const token = localStorage.getItem("token") || localStorage.getItem("authToken");
   
   const headers: Record<string, string> = data ? { "Content-Type": "application/json" } : {};
   
   // Add authorization header if token exists
-  if (authToken) {
-    headers["Authorization"] = `Bearer ${authToken}`;
+  if (token) {
+    headers["Authorization"] = `Bearer ${token}`;
+    console.log(`Adding auth token to ${method} ${url}`);
+  } else {
+    console.log(`No auth token found for ${method} ${url}`);
   }
   
   const res = await fetch(url, {
@@ -56,8 +59,13 @@ export async function apiRequest(
     credentials: "include",
   });
 
-  await throwIfResNotOk(res);
-  return res;
+  try {
+    await throwIfResNotOk(res);
+    return res;
+  } catch (error) {
+    console.error(`API request error for ${method} ${url}:`, error);
+    throw error;
+  }
 }
 
 type UnauthorizedBehavior = "returnNull" | "throw";
@@ -66,24 +74,36 @@ export const getQueryFn: <T>(options: {
 }) => QueryFunction<T> =
   ({ on401: unauthorizedBehavior }) =>
   async ({ queryKey }) => {
-    const authToken = localStorage.getItem("authToken");
+    // Get auth token from localStorage (try both possible keys)
+    const token = localStorage.getItem("token") || localStorage.getItem("authToken");
     const headers: Record<string, string> = {};
     
-    if (authToken) {
-      headers["Authorization"] = `Bearer ${authToken}`;
+    if (token) {
+      headers["Authorization"] = `Bearer ${token}`;
+      console.log(`Adding auth token to query for ${queryKey[0]}`);
+    } else {
+      console.log(`No auth token found for query ${queryKey[0]}`);
     }
     
-    const res = await fetch(queryKey[0] as string, {
-      credentials: "include",
-      headers,
-    });
+    try {
+      const res = await fetch(queryKey[0] as string, {
+        credentials: "include",
+        headers,
+      });
 
-    if (unauthorizedBehavior === "returnNull" && res.status === 401) {
-      return null;
+      console.log(`Query response for ${queryKey[0]}: status ${res.status}`);
+
+      if (unauthorizedBehavior === "returnNull" && res.status === 401) {
+        console.log(`Returning null for 401 on ${queryKey[0]}`);
+        return null;
+      }
+
+      await throwIfResNotOk(res);
+      return await res.json();
+    } catch (error) {
+      console.error(`Query error for ${queryKey[0]}:`, error);
+      throw error;
     }
-
-    await throwIfResNotOk(res);
-    return await res.json();
   };
 
 export const queryClient = new QueryClient({

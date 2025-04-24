@@ -54,9 +54,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       return await res.json();
     },
     onSuccess: (data) => {
-      // Set auth token
+      // Set auth token - this is the key used in the API requests
+      console.log("Setting auth token from login:", data.token);
+      localStorage.setItem("token", data.token);
+      
+      // Also set it under authToken for backward compatibility
       localStorage.setItem("authToken", data.token);
-      // Refetch user data
+      
+      // Invalidate and refetch user data
+      queryClient.invalidateQueries({ queryKey: ["/api/user"] });
       refetch();
       
       toast({
@@ -65,6 +71,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       });
     },
     onError: (error: Error) => {
+      console.error("Login error:", error);
       toast({
         title: "Login failed",
         description: error.message,
@@ -79,9 +86,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       return await res.json();
     },
     onSuccess: (data) => {
-      // Set auth token
+      // Set auth token - this is the key used in the API requests
+      console.log("Setting auth token from registration:", data.token);
+      localStorage.setItem("token", data.token);
+      
+      // Also set it under authToken for backward compatibility
       localStorage.setItem("authToken", data.token);
-      // Refetch user data
+      
+      // Invalidate and refetch user data
+      queryClient.invalidateQueries({ queryKey: ["/api/user"] });
       refetch();
       
       toast({
@@ -90,6 +103,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       });
     },
     onError: (error: Error) => {
+      console.error("Registration error:", error);
       toast({
         title: "Registration failed",
         description: error.message,
@@ -100,7 +114,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const logoutMutation = useMutation({
     mutationFn: async () => {
+      // Clear both token keys
+      localStorage.removeItem("token");
       localStorage.removeItem("authToken");
+      console.log("Cleared auth tokens on logout");
+      
       // Invalidate cached user data
       queryClient.setQueryData(["/api/user"], null);
     },
@@ -111,6 +129,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       });
     },
     onError: (error: Error) => {
+      console.error("Logout error:", error);
       toast({
         title: "Logout failed",
         description: error.message,

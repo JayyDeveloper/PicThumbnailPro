@@ -119,14 +119,24 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       localStorage.removeItem("authToken");
       console.log("Cleared auth tokens on logout");
       
-      // Invalidate cached user data
+      // Invalidate cached user data and set to null to trigger redirects
       queryClient.setQueryData(["/api/user"], null);
+      
+      // Also make an API call to the server to clear session cookies
+      try {
+        await apiRequest("POST", "/api/auth/logout");
+      } catch (error) {
+        console.log("Server logout failed, but continuing with client logout");
+      }
     },
     onSuccess: () => {
       toast({
         title: "Logged out",
         description: "You have been logged out successfully.",
       });
+      
+      // Force refresh all user-related queries to ensure auth state is consistent
+      queryClient.invalidateQueries({ queryKey: ["/api/user"] });
     },
     onError: (error: Error) => {
       console.error("Logout error:", error);

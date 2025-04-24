@@ -619,8 +619,8 @@ export default function EditorPage() {
                 <div className="flex justify-between items-center gap-4 mt-4">
                   <div className="flex items-center">
                     <Sparkles className="h-5 w-5 text-yellow-500 mr-1.5" />
-                    <span className="mr-1 font-medium">{user?.points || 0} available {user?.points === 1 ? 'point' : 'points'}</span>
-                    {user?.points === 1 && (
+                    <span className="mr-1 font-medium">{user?.points ?? 1} available {(user?.points ?? 1) === 1 ? 'point' : 'points'}</span>
+                    {(user?.points ?? 1) === 1 && (
                       <span className="text-xs text-muted-foreground">(Free trial)</span>
                     )}
                   </div>

@@ -90,10 +90,12 @@ export default function AccountPage() {
                 <h3 className="text-sm font-medium text-gray-500">Available Points</h3>
                 <div className="mt-1 flex items-center">
                   <Sparkles className="h-5 w-5 text-yellow-500 mr-1.5" />
-                  <span className="text-2xl font-bold">{user.points || 0}</span>
+                  <span className="text-2xl font-bold">{user.points ?? 1}</span>
                 </div>
                 <div className="mt-1 text-xs text-muted-foreground">
-                  {!user.points || user.points === 0 ? 
+                  {(!user.points && user.points !== 0) ? 
+                    "You have 1 free trial point remaining - enough for 1 more thumbnail." : 
+                    user.points === 0 ? 
                     "You're out of points! Purchase more to continue creating thumbnails." : 
                     user.points === 1 ? 
                     "You have 1 free trial point remaining - enough for 1 more thumbnail." : 

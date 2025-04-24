@@ -9,6 +9,7 @@ import {
   Crop 
 } from "lucide-react";
 import { useAuth } from "@/hooks/use-auth";
+import AuthTest from "@/components/auth-test";
 
 export default function Home() {
   const [_, setLocation] = useLocation();
@@ -150,6 +151,14 @@ export default function Home() {
               </div>
             </div>
           </div>
+        </div>
+      </section>
+      
+      {/* Auth Test Section */}
+      <section className="py-16 bg-background">
+        <div className="container mx-auto px-4">
+          <h2 className="text-3xl font-bold text-center text-foreground mb-12">Testing Tools</h2>
+          <AuthTest />
         </div>
       </section>
     </div>

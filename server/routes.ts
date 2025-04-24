@@ -665,12 +665,27 @@ export async function registerRoutes(app: Express): Promise<Server> {
         console.log(`Created test user ${username} with ${points} points`);
       } else {
         // Update existing user's points
-        user = await storage.updateUser(user.id, { points });
+        const updatedUser = await storage.updateUser(user.id, { points });
+        if (updatedUser) {
+          user = updatedUser;
+        }
         console.log(`Updated test user ${username} to have ${points} points`);
       }
       
-      // Return user without password
-      const { password: _, ...userWithoutPassword } = user;
+      if (!user) {
+        return res.status(500).json({ error: 'Failed to create or update user' });
+      }
+      
+      // Create a new object without the password
+      const userWithoutPassword = {
+        id: user.id,
+        username: user.username,
+        email: user.email,
+        points: user.points,
+        createdAt: user.createdAt,
+        stripeCustomerId: user.stripeCustomerId
+      };
+      
       res.json({
         user: userWithoutPassword,
         token: String(user.id),

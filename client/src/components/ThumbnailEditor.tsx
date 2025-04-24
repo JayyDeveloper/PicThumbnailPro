@@ -17,9 +17,19 @@ import {
 import { useToast } from "@/hooks/use-toast";
 import { ThumbnailData, TextElement } from "@/pages/EditorPage";
 import { StickerElement } from "@/hooks/useStickerEditor";
-import { useMutation } from "@tanstack/react-query";
+import { useMutation, useQuery } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
 import { ShareModal } from "@/components/ShareModal";
+import { InsufficientPointsDialog } from "@/components/InsufficientPointsDialog";
+
+// User data type
+interface UserData {
+  id: number;
+  username: string;
+  email: string;
+  points: number;
+  createdAt: string;
+}
 
 interface ThumbnailEditorProps {
   thumbnailData: ThumbnailData;
@@ -61,6 +71,13 @@ export default function ThumbnailEditor({
   const [dragging, setDragging] = useState(false);
   const [dragOffset, setDragOffset] = useState({ x: 0, y: 0 });
   const [shareModalOpen, setShareModalOpen] = useState(false);
+  const [insufficientPointsOpen, setInsufficientPointsOpen] = useState(false);
+  
+  // Get user data to check points
+  const { data: userData } = useQuery<UserData>({
+    queryKey: ['/api/user'],
+    refetchOnWindowFocus: true,
+  });
 
   // Function to handle downloading the thumbnail
   const downloadThumbnail = async () => {
@@ -73,6 +90,12 @@ export default function ThumbnailEditor({
       return;
     }
 
+    // Check if user has enough points
+    if (!userData || userData.points < 1) {
+      setInsufficientPointsOpen(true);
+      return;
+    }
+
     try {
       const response = await fetch('/api/thumbnails/export', {
         method: 'POST',
@@ -82,7 +105,14 @@ export default function ThumbnailEditor({
         body: JSON.stringify(thumbnailData),
       });
 
-      if (!response.ok) throw new Error('Export failed');
+      if (!response.ok) {
+        if (response.status === 403) {
+          // If server says insufficient points
+          setInsufficientPointsOpen(true);
+          return;
+        }
+        throw new Error('Export failed');
+      }
 
       const blob = await response.blob();
       const url = window.URL.createObjectURL(blob);
@@ -107,11 +137,41 @@ export default function ThumbnailEditor({
     }
   };
 
+  // Check points before saving or downloading
+  const checkPointsBeforeAction = () => {
+    if (!userData || userData.points < 1) {
+      setInsufficientPointsOpen(true);
+      return false;
+    }
+    return true;
+  };
+
   // Save thumbnail mutation
   const saveMutation = useMutation({
     mutationFn: async () => {
-      const response = await apiRequest('POST', '/api/thumbnails', thumbnailData);
-      return await response.json();
+      // Check points before saving
+      if (!checkPointsBeforeAction()) {
+        throw new Error("Insufficient points");
+      }
+      
+      // Use points and save thumbnail
+      try {
+        // Call the API to use a point first
+        const usePointsResponse = await apiRequest('POST', '/api/use-points', {});
+        if (!usePointsResponse.ok) {
+          if (usePointsResponse.status === 403) {
+            setInsufficientPointsOpen(true);
+            throw new Error("Insufficient points");
+          }
+          throw new Error("Failed to use points");
+        }
+        
+        // If point usage succeeded, save the thumbnail
+        const response = await apiRequest('POST', '/api/thumbnails', thumbnailData);
+        return await response.json();
+      } catch (error) {
+        throw error;
+      }
     },
     onSuccess: () => {
       toast({
@@ -119,7 +179,12 @@ export default function ThumbnailEditor({
         description: "Your thumbnail has been saved successfully.",
       });
     },
-    onError: () => {
+    onError: (error: any) => {
+      if (error.message === "Insufficient points") {
+        // Already handled by opening the dialog
+        return;
+      }
+      
       toast({
         title: "Save Failed",
         description: "There was an error saving your thumbnail.",
@@ -544,6 +609,12 @@ export default function ThumbnailEditor({
         onOpenChange={setShareModalOpen}
         imageUrl={thumbnailData.imageUrl || ''}
         thumbnailName={thumbnailData.name || 'YouTube Thumbnail'}
+      />
+      
+      {/* Insufficient Points Dialog */}
+      <InsufficientPointsDialog
+        open={insufficientPointsOpen}
+        onOpenChange={setInsufficientPointsOpen}
       />
     </div>
   );

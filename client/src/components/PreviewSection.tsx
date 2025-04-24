@@ -125,9 +125,6 @@ export default function PreviewSection({ thumbnailData }: PreviewSectionProps) {
               >
                 <h3 
                   style={{
-                    color: element.gradient?.enabled 
-                      ? 'transparent' 
-                      : element.color,
                     fontSize: `${element.fontSize * 0.7}px`, // Scale down for preview
                     fontFamily: element.fontFamily,
                     fontWeight: element.fontWeight,
@@ -142,11 +139,17 @@ export default function PreviewSection({ thumbnailData }: PreviewSectionProps) {
                     WebkitTextStroke: element.outline?.enabled
                       ? `${element.outline.width}px ${element.outline.color}`
                       : 'none',
-                    ...(element.gradient?.enabled && {
-                      background: `linear-gradient(${element.gradient.direction}, ${element.gradient.startColor}, ${element.gradient.endColor})`,
-                      WebkitBackgroundClip: 'text',
-                      backgroundClip: 'text',
-                    }),
+                    ...(element.gradient?.enabled 
+                      ? {
+                          color: 'transparent',
+                          backgroundImage: `linear-gradient(${element.gradient.direction}, ${element.gradient.startColor}, ${element.gradient.endColor})`,
+                          WebkitBackgroundClip: 'text',
+                          backgroundClip: 'text',
+                        }
+                      : { 
+                          color: element.color 
+                        }
+                    ),
                   }}
                 >
                   {element.content}

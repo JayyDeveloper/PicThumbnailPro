@@ -136,19 +136,17 @@ export default function PreviewSection({ thumbnailData }: PreviewSectionProps) {
                     textShadow: element.textShadow?.enabled 
                       ? `${element.textShadow.offsetX}px ${element.textShadow.offsetY}px ${element.textShadow.blur}px ${element.textShadow.color}` 
                       : 'none',
-                    WebkitTextStroke: element.outline?.enabled
-                      ? `${element.outline.width}px ${element.outline.color}`
-                      : 'none',
+                    WebkitTextStroke: element.outline?.enabled 
+                      ? `${element.outline.width}px ${element.outline.color}` 
+                      : '0px transparent',
+                    color: element.gradient?.enabled ? 'transparent' : element.color,
                     ...(element.gradient?.enabled 
                       ? {
-                          color: 'transparent',
                           backgroundImage: `linear-gradient(${element.gradient.direction}, ${element.gradient.startColor}, ${element.gradient.endColor})`,
                           WebkitBackgroundClip: 'text',
                           backgroundClip: 'text',
                         }
-                      : { 
-                          color: element.color 
-                        }
+                      : {}
                     ),
                   }}
                 >

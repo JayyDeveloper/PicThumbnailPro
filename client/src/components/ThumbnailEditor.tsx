@@ -92,22 +92,43 @@ export default function ThumbnailEditor({
 
     // Check if user has enough points
     if (!userData || userData.points < 1) {
+      console.log("Client-side check: Insufficient points for download", userData?.points);
       setInsufficientPointsOpen(true);
       return;
     }
 
     try {
+      const token = localStorage.getItem('token');
+      console.log("Attempting export with token:", token ? "Token exists" : "No token");
+      
       const response = await fetch('/api/thumbnails/export', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
         },
-        body: JSON.stringify(thumbnailData),
+        body: JSON.stringify({
+          imageUrl: thumbnailData.imageUrl,
+          elements: thumbnailData.elements,
+          filters: thumbnailData.filters
+        }),
       });
 
+      console.log("Export response status:", response.status);
+      
       if (!response.ok) {
+        // Try to parse the error as JSON
+        let errorData = {}; 
+        try {
+          errorData = await response.clone().json();
+          console.log("Export error data:", errorData);
+        } catch (e) {
+          console.log("Failed to parse error response as JSON");
+        }
+        
         if (response.status === 403) {
           // If server says insufficient points
+          console.log("Server rejected download - insufficient points");
           setInsufficientPointsOpen(true);
           return;
         }
@@ -128,7 +149,16 @@ export default function ThumbnailEditor({
         title: "Download Complete",
         description: "Your thumbnail has been downloaded.",
       });
-    } catch (error) {
+    } catch (error: any) {
+      console.error('Download error:', error.message || error);
+      
+      // Check if it's a points-related error
+      if (error.message && error.message.includes("points")) {
+        console.log('Points-related download error detected');
+        setInsufficientPointsOpen(true);
+        return;
+      }
+      
       toast({
         title: "Download Failed",
         description: "There was an error downloading your thumbnail.",
@@ -139,10 +169,14 @@ export default function ThumbnailEditor({
 
   // Check points before saving or downloading
   const checkPointsBeforeAction = () => {
+    console.log('Checking points before action, current points:', userData?.points);
+    
     if (!userData || userData.points < 1) {
+      console.log('Insufficient points detected, showing dialog');
       setInsufficientPointsOpen(true);
       return false;
     }
+    
     return true;
   };
 

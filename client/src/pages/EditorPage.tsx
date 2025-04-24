@@ -82,6 +82,9 @@ export default function EditorPage() {
     },
     name: "Untitled Thumbnail",
   });
+  
+  // Thumbnail history for undo functionality
+  const [thumbnailHistory, setThumbnailHistory] = useState<ThumbnailData[]>([]);
 
   const [selectedElement, setSelectedElement] = useState<TextElement | null>(null);
   const [selectedSticker, setSelectedSticker] = useState<StickerElement | null>(null);
@@ -107,7 +110,44 @@ export default function EditorPage() {
     });
   };
 
+  // Function to add current state to history
+  const addToHistory = (thumbnail: ThumbnailData) => {
+    setThumbnailHistory(prev => [...prev, JSON.parse(JSON.stringify(thumbnail))]);
+  };
+  
+  // Function to handle undo action
+  const handleUndo = () => {
+    if (thumbnailHistory.length === 0) {
+      toast({
+        title: "Nothing to Undo",
+        description: "There are no actions to undo.",
+      });
+      return;
+    }
+    
+    // Get the last state from history
+    const lastState = thumbnailHistory[thumbnailHistory.length - 1];
+    
+    // Update current thumbnail to the previous state
+    setCurrentThumbnail(lastState);
+    
+    // Remove the last state from history
+    setThumbnailHistory(prev => prev.slice(0, -1));
+    
+    // Clear selection
+    setSelectedElement(null);
+    setSelectedSticker(null);
+    
+    toast({
+      title: "Undo Complete",
+      description: "Your last action has been undone.",
+    });
+  };
+
   const handleAddTextElement = () => {
+    // Add current state to history before making changes
+    addToHistory(currentThumbnail);
+    
     const newElement: TextElement = {
       id: `text-${Date.now()}`,
       content: "YOUR TEXT HERE",
@@ -165,6 +205,9 @@ export default function EditorPage() {
   };
 
   const handleDeleteElement = (id: string) => {
+    // Add current state to history before making changes
+    addToHistory(currentThumbnail);
+    
     setCurrentThumbnail({
       ...currentThumbnail,
       elements: currentThumbnail.elements.filter(el => el.id !== id),
@@ -192,8 +235,12 @@ export default function EditorPage() {
   };
 
   const handleReset = () => {
+    // Add current state to history before making changes
+    addToHistory(currentThumbnail);
+    
     setCurrentThumbnail({
-      imageUrl: "",
+      // Keep the image, but remove everything else
+      imageUrl: currentThumbnail.imageUrl,
       elements: [],
       stickers: [],
       filters: {
@@ -209,7 +256,7 @@ export default function EditorPage() {
     setSelectedSticker(null);
     toast({
       title: "Reset Complete",
-      description: "Your thumbnail has been reset.",
+      description: "All elements have been removed, but the image is kept.",
     });
   };
   

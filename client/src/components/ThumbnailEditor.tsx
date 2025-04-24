@@ -479,14 +479,6 @@ export default function ThumbnailEditor({
           variant="outline"
           size="sm"
           className="text-sm flex items-center"
-          onClick={() => toast({ title: "Feature Coming Soon", description: "Crop functionality will be available soon." })}
-        >
-          <Crop className="h-4 w-4 mr-1" /> Crop
-        </Button>
-        <Button
-          variant="outline"
-          size="sm"
-          className="text-sm flex items-center"
           onClick={onAddText}
         >
           <Type className="h-4 w-4 mr-1" /> Text
@@ -495,50 +487,7 @@ export default function ThumbnailEditor({
           variant="outline"
           size="sm"
           className="text-sm flex items-center"
-          onClick={() => {
-            // Use a simple sticker URL for demo purposes
-            const demoStickers = [
-              'https://upload.wikimedia.org/wikipedia/commons/thumb/b/bc/Thumbs_up_silhouette.svg/1200px-Thumbs_up_silhouette.svg.png',
-              'https://cdn-icons-png.flaticon.com/512/5231/5231019.png',
-              'https://static.vecteezy.com/system/resources/previews/011/571/337/original/fire-icon-flame-symbol-free-png.png',
-              'https://static.vecteezy.com/system/resources/previews/014/980/555/original/star-icon-transparent-free-png.png',
-              'https://www.freeiconspng.com/thumbs/arrow-icon/arrow-icon--myiconfinder-23.png'
-            ];
-            const randomIndex = Math.floor(Math.random() * demoStickers.length);
-            onAddSticker(demoStickers[randomIndex]);
-          }}
-        >
-          <ImagePlus className="h-4 w-4 mr-1" /> Sticker
-        </Button>
-        <Button
-          variant="outline"
-          size="sm"
-          className="text-sm flex items-center"
-          onClick={() => toast({ title: "Feature Coming Soon", description: "Filter options will be available soon." })}
-        >
-          <Palette className="h-4 w-4 mr-1" /> Filters
-        </Button>
-        <Button
-          variant="outline"
-          size="sm"
-          className="text-sm flex items-center"
-          onClick={() => toast({ title: "Feature Coming Soon", description: "Adjust options will be available soon." })}
-        >
-          <Sliders className="h-4 w-4 mr-1" /> Adjust
-        </Button>
-        <Button
-          variant="outline"
-          size="sm"
-          className="text-sm flex items-center"
-          onClick={() => toast({ title: "Feature Coming Soon", description: "Layer management will be available soon." })}
-        >
-          <Layers className="h-4 w-4 mr-1" /> Layers
-        </Button>
-        <Button
-          variant="outline"
-          size="sm"
-          className="text-sm flex items-center"
-          onClick={() => toast({ title: "Feature Coming Soon", description: "Undo functionality will be available soon." })}
+          onClick={handleUndo}
         >
           <Undo className="h-4 w-4 mr-1" /> Undo
         </Button>

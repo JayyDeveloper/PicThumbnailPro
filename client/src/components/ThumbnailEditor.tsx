@@ -11,13 +11,15 @@ import {
   Save, 
   Download,
   ImagePlus,
-  Trash2
+  Trash2,
+  Share2
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { ThumbnailData, TextElement } from "@/pages/EditorPage";
 import { StickerElement } from "@/hooks/useStickerEditor";
 import { useMutation } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
+import { ShareModal } from "@/components/ShareModal";
 
 interface ThumbnailEditorProps {
   thumbnailData: ThumbnailData;
@@ -56,6 +58,7 @@ export default function ThumbnailEditor({
   const editorRef = useRef<HTMLDivElement>(null);
   const [dragging, setDragging] = useState(false);
   const [dragOffset, setDragOffset] = useState({ x: 0, y: 0 });
+  const [shareModalOpen, setShareModalOpen] = useState(false);
 
   // Function to handle downloading the thumbnail
   const downloadThumbnail = async () => {
@@ -544,6 +547,17 @@ export default function ThumbnailEditor({
           >
             <Save className="h-4 w-4 mr-1" /> Save
           </Button>
+          
+          <Button
+            variant="outline"
+            size="sm"
+            className="text-sm flex items-center"
+            onClick={() => setShareModalOpen(true)}
+            disabled={!thumbnailData.imageUrl}
+          >
+            <Share2 className="h-4 w-4 mr-1" /> Share
+          </Button>
+          
           <Button
             variant="default"
             size="sm"
@@ -555,6 +569,14 @@ export default function ThumbnailEditor({
           </Button>
         </div>
       </div>
+      
+      {/* Share Modal */}
+      <ShareModal 
+        open={shareModalOpen}
+        onOpenChange={setShareModalOpen}
+        imageUrl={thumbnailData.imageUrl || ''}
+        thumbnailName={thumbnailData.name || 'YouTube Thumbnail'}
+      />
     </div>
   );
 }

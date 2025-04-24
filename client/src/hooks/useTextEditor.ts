@@ -1,43 +1,5 @@
 import { useState } from 'react';
-
-export interface TextElement {
-  id: string;
-  content: string;
-  x: number;
-  y: number;
-  fontSize: number;
-  fontFamily: string;
-  fontWeight: string;
-  color: string;
-  backgroundColor: string;
-  backgroundOpacity: number;
-  alignment: 'left' | 'center' | 'right';
-  bold: boolean;
-  italic: boolean;
-  underline: boolean;
-  // Advanced text effects
-  textShadow: {
-    enabled: boolean;
-    color: string;
-    blur: number;
-    offsetX: number;
-    offsetY: number;
-  };
-  outline: {
-    enabled: boolean;
-    color: string;
-    width: number;
-  };
-  gradient: {
-    enabled: boolean;
-    startColor: string;
-    endColor: string;
-    direction: 'to-bottom' | 'to-right' | 'to-top' | 'to-left' | 'to-bottom-right' | 'to-top-right';
-  };
-  letterSpacing: number;
-  transform: 'normal' | 'uppercase' | 'lowercase' | 'capitalize';
-  rotateZ: number;
-}
+import { TextElement } from '@/pages/EditorPage';
 
 export default function useTextEditor() {
   const [elements, setElements] = useState<TextElement[]>([]);

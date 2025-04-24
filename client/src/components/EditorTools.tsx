@@ -382,6 +382,312 @@ export default function EditorTools({
               ))}
             </div>
           </div>
+          
+          {/* Advanced Text Effects */}
+          <Tabs defaultValue="shadow" className="w-full mt-4">
+            <TabsList className="grid grid-cols-4 mb-2">
+              <TabsTrigger value="shadow" className="text-xs flex gap-1 items-center">
+                <Droplet className="h-3 w-3" /> Shadow
+              </TabsTrigger>
+              <TabsTrigger value="outline" className="text-xs flex gap-1 items-center">
+                <Type className="h-3 w-3" /> Outline
+              </TabsTrigger>
+              <TabsTrigger value="gradient" className="text-xs flex gap-1 items-center">
+                <Palette className="h-3 w-3" /> Gradient
+              </TabsTrigger>
+              <TabsTrigger value="transform" className="text-xs flex gap-1 items-center">
+                <SlidersHorizontal className="h-3 w-3" /> More
+              </TabsTrigger>
+            </TabsList>
+            
+            {/* Shadow Tab */}
+            <TabsContent value="shadow" className="space-y-3">
+              <div className="flex items-center justify-between">
+                <Label className="text-sm font-medium text-gray-700">Text Shadow</Label>
+                <Switch 
+                  checked={selectedElement.textShadow?.enabled || false}
+                  onCheckedChange={(checked) => {
+                    onElementUpdate({
+                      ...selectedElement,
+                      textShadow: {
+                        ...(selectedElement.textShadow || { color: '#000000', blur: 4, offsetX: 2, offsetY: 2 }),
+                        enabled: checked
+                      }
+                    });
+                  }}
+                />
+              </div>
+              {selectedElement.textShadow?.enabled && (
+                <>
+                  <div className="grid grid-cols-2 gap-3">
+                    <div>
+                      <Label className="text-xs">Shadow Color</Label>
+                      <div className="grid grid-cols-6 gap-1 mt-1">
+                        {colorOptions.map(color => (
+                          <button
+                            key={color}
+                            className={`h-6 w-full rounded-md ${color === selectedElement.textShadow?.color ? 'ring-2 ring-blue-500' : ''}`}
+                            style={{ backgroundColor: color, border: color === "#FFFFFF" ? "1px solid #E5E7EB" : "none" }}
+                            onClick={() => onElementUpdate({
+                              ...selectedElement,
+                              textShadow: {
+                                ...selectedElement.textShadow!,
+                                color
+                              }
+                            })}
+                          />
+                        ))}
+                      </div>
+                    </div>
+                    <div>
+                      <Label className="text-xs">Blur: {selectedElement.textShadow?.blur}px</Label>
+                      <Slider 
+                        value={[selectedElement.textShadow?.blur || 4]} 
+                        min={0} 
+                        max={20} 
+                        step={1}
+                        onValueChange={(values) => onElementUpdate({
+                          ...selectedElement,
+                          textShadow: {
+                            ...selectedElement.textShadow!,
+                            blur: values[0]
+                          }
+                        })}
+                        className="mt-1" 
+                      />
+                    </div>
+                  </div>
+                  <div className="grid grid-cols-2 gap-3">
+                    <div>
+                      <Label className="text-xs">Offset X: {selectedElement.textShadow?.offsetX}px</Label>
+                      <Slider 
+                        value={[selectedElement.textShadow?.offsetX || 2]} 
+                        min={-10} 
+                        max={10} 
+                        step={1}
+                        onValueChange={(values) => onElementUpdate({
+                          ...selectedElement,
+                          textShadow: {
+                            ...selectedElement.textShadow!,
+                            offsetX: values[0]
+                          }
+                        })}
+                        className="mt-1" 
+                      />
+                    </div>
+                    <div>
+                      <Label className="text-xs">Offset Y: {selectedElement.textShadow?.offsetY}px</Label>
+                      <Slider 
+                        value={[selectedElement.textShadow?.offsetY || 2]} 
+                        min={-10} 
+                        max={10} 
+                        step={1}
+                        onValueChange={(values) => onElementUpdate({
+                          ...selectedElement,
+                          textShadow: {
+                            ...selectedElement.textShadow!,
+                            offsetY: values[0]
+                          }
+                        })}
+                        className="mt-1" 
+                      />
+                    </div>
+                  </div>
+                </>
+              )}
+            </TabsContent>
+            
+            {/* Outline Tab */}
+            <TabsContent value="outline" className="space-y-3">
+              <div className="flex items-center justify-between">
+                <Label className="text-sm font-medium text-gray-700">Text Outline</Label>
+                <Switch 
+                  checked={selectedElement.outline?.enabled || false}
+                  onCheckedChange={(checked) => {
+                    onElementUpdate({
+                      ...selectedElement,
+                      outline: {
+                        ...(selectedElement.outline || { color: '#000000', width: 2 }),
+                        enabled: checked
+                      }
+                    });
+                  }}
+                />
+              </div>
+              {selectedElement.outline?.enabled && (
+                <>
+                  <div>
+                    <Label className="text-xs">Outline Color</Label>
+                    <div className="grid grid-cols-6 gap-1 mt-1">
+                      {colorOptions.map(color => (
+                        <button
+                          key={color}
+                          className={`h-6 w-full rounded-md ${color === selectedElement.outline?.color ? 'ring-2 ring-blue-500' : ''}`}
+                          style={{ backgroundColor: color, border: color === "#FFFFFF" ? "1px solid #E5E7EB" : "none" }}
+                          onClick={() => onElementUpdate({
+                            ...selectedElement,
+                            outline: {
+                              ...selectedElement.outline!,
+                              color
+                            }
+                          })}
+                        />
+                      ))}
+                    </div>
+                  </div>
+                  <div>
+                    <Label className="text-xs">Width: {selectedElement.outline?.width}px</Label>
+                    <Slider 
+                      value={[selectedElement.outline?.width || 2]} 
+                      min={1} 
+                      max={5} 
+                      step={0.5}
+                      onValueChange={(values) => onElementUpdate({
+                        ...selectedElement,
+                        outline: {
+                          ...selectedElement.outline!,
+                          width: values[0]
+                        }
+                      })}
+                      className="mt-1" 
+                    />
+                  </div>
+                </>
+              )}
+            </TabsContent>
+            
+            {/* Gradient Tab */}
+            <TabsContent value="gradient" className="space-y-3">
+              <div className="flex items-center justify-between">
+                <Label className="text-sm font-medium text-gray-700">Text Gradient</Label>
+                <Switch 
+                  checked={selectedElement.gradient?.enabled || false}
+                  onCheckedChange={(checked) => {
+                    onElementUpdate({
+                      ...selectedElement,
+                      gradient: {
+                        ...(selectedElement.gradient || { startColor: '#FF5F6D', endColor: '#FFC371', direction: 'to-bottom' }),
+                        enabled: checked
+                      }
+                    });
+                  }}
+                />
+              </div>
+              {selectedElement.gradient?.enabled && (
+                <>
+                  <div className="grid grid-cols-2 gap-3">
+                    <div>
+                      <Label className="text-xs">Start Color</Label>
+                      <Input 
+                        type="color" 
+                        value={selectedElement.gradient?.startColor || '#FF5F6D'} 
+                        onChange={(e) => onElementUpdate({
+                          ...selectedElement,
+                          gradient: {
+                            ...selectedElement.gradient!,
+                            startColor: e.target.value
+                          }
+                        })}
+                        className="h-8 w-full p-1 mt-1" 
+                      />
+                    </div>
+                    <div>
+                      <Label className="text-xs">End Color</Label>
+                      <Input 
+                        type="color" 
+                        value={selectedElement.gradient?.endColor || '#FFC371'} 
+                        onChange={(e) => onElementUpdate({
+                          ...selectedElement,
+                          gradient: {
+                            ...selectedElement.gradient!,
+                            endColor: e.target.value
+                          }
+                        })}
+                        className="h-8 w-full p-1 mt-1" 
+                      />
+                    </div>
+                  </div>
+                  <div>
+                    <Label className="text-xs">Direction</Label>
+                    <Select 
+                      value={selectedElement.gradient?.direction || 'to-bottom'}
+                      onValueChange={(value: any) => onElementUpdate({
+                        ...selectedElement,
+                        gradient: {
+                          ...selectedElement.gradient!,
+                          direction: value
+                        }
+                      })}
+                    >
+                      <SelectTrigger className="h-8 mt-1">
+                        <SelectValue placeholder="Select direction" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="to-bottom">Top to Bottom</SelectItem>
+                        <SelectItem value="to-right">Left to Right</SelectItem>
+                        <SelectItem value="to-top">Bottom to Top</SelectItem>
+                        <SelectItem value="to-left">Right to Left</SelectItem>
+                        <SelectItem value="to-bottom-right">Diagonal ↘</SelectItem>
+                        <SelectItem value="to-top-right">Diagonal ↗</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </>
+              )}
+            </TabsContent>
+            
+            {/* Transform Tab */}
+            <TabsContent value="transform" className="space-y-3">
+              <div>
+                <Label className="text-xs">Letter Spacing: {selectedElement.letterSpacing || 0}px</Label>
+                <Slider 
+                  value={[selectedElement.letterSpacing || 0]} 
+                  min={-2} 
+                  max={10} 
+                  step={0.5}
+                  onValueChange={(values) => onElementUpdate({
+                    ...selectedElement,
+                    letterSpacing: values[0]
+                  })}
+                  className="mt-1" 
+                />
+              </div>
+              <div>
+                <Label className="text-xs">Rotation: {selectedElement.rotateZ || 0}°</Label>
+                <Slider 
+                  value={[selectedElement.rotateZ || 0]} 
+                  min={-30} 
+                  max={30} 
+                  step={1}
+                  onValueChange={(values) => onElementUpdate({
+                    ...selectedElement,
+                    rotateZ: values[0]
+                  })}
+                  className="mt-1" 
+                />
+              </div>
+              <div>
+                <Label className="text-xs">Text Transform</Label>
+                <Select 
+                  value={selectedElement.transform || 'normal'}
+                  onValueChange={(value: any) => onElementUpdate({
+                    ...selectedElement,
+                    transform: value
+                  })}
+                >
+                  <SelectTrigger className="h-8 mt-1">
+                    <SelectValue placeholder="Select transform" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="normal">Normal</SelectItem>
+                    <SelectItem value="uppercase">UPPERCASE</SelectItem>
+                    <SelectItem value="lowercase">lowercase</SelectItem>
+                    <SelectItem value="capitalize">Capitalize</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </TabsContent>
+          </Tabs>
         </div>
       )}
       

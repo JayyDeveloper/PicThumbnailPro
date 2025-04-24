@@ -93,7 +93,7 @@ export default function AccountPage() {
                   <span className="text-2xl font-bold">{user.points || 0}</span>
                 </div>
                 <div className="mt-1 text-xs text-muted-foreground">
-                  {user.points === 0 ? 
+                  {!user.points || user.points === 0 ? 
                     "You're out of points! Purchase more to continue creating thumbnails." : 
                     user.points === 1 ? 
                     "You have 1 point remaining - enough for 1 more thumbnail." : 

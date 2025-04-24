@@ -261,6 +261,9 @@ export default function EditorPage() {
   };
   
   const handleAddEmoji = (emoji: string) => {
+    // Add current state to history before making changes
+    addToHistory(currentThumbnail);
+    
     const newElement: TextElement = {
       id: `emoji-${Date.now()}`,
       content: emoji,
@@ -315,6 +318,9 @@ export default function EditorPage() {
   
   // Add a new sticker
   const handleAddSticker = (imageUrl: string) => {
+    // Add current state to history before making changes
+    addToHistory(currentThumbnail);
+    
     const newSticker: StickerElement = {
       id: `sticker-${Date.now()}`,
       imageUrl,
@@ -349,6 +355,9 @@ export default function EditorPage() {
   // Delete a sticker
   const handleDeleteSticker = () => {
     if (!selectedSticker) return;
+    
+    // Add current state to history before making changes
+    addToHistory(currentThumbnail);
     
     setCurrentThumbnail({
       ...currentThumbnail,
@@ -466,6 +475,7 @@ export default function EditorPage() {
                   onBringToFront={handleBringToFront}
                   onSendToBack={handleSendToBack}
                   onReset={handleReset}
+                  onUndo={handleUndo}
                 />
                 
                 <div className="mt-6">

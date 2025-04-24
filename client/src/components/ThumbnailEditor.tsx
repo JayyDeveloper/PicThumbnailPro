@@ -36,6 +36,7 @@ interface ThumbnailEditorProps {
   onBringToFront: () => void;
   onSendToBack: () => void;
   onReset: () => void;
+  onUndo?: () => void; // Added undo handler prop
 }
 
 export default function ThumbnailEditor({
@@ -52,7 +53,8 @@ export default function ThumbnailEditor({
   onAddSticker,
   onBringToFront,
   onSendToBack,
-  onReset
+  onReset,
+  onUndo
 }: ThumbnailEditorProps) {
   const { toast } = useToast();
   const editorRef = useRef<HTMLDivElement>(null);
@@ -305,16 +307,16 @@ export default function ThumbnailEditor({
   };
 
   return (
-    <div className="bg-white rounded-lg shadow-sm p-4 mb-6">
+    <div className="bg-card rounded-lg shadow-sm p-4 mb-6 dark:border dark:border-border">
       <div className="flex justify-between items-center mb-4">
-        <h2 className="text-lg font-semibold">YouTube Thumbnail Editor</h2>
-        <div className="text-sm text-gray-500">1280 × 720 px</div>
+        <h2 className="text-lg font-semibold text-foreground">YouTube Thumbnail Editor</h2>
+        <div className="text-sm text-muted-foreground">1280 × 720 px</div>
       </div>
       
       {/* Main Canvas Area */}
       <div 
         ref={editorRef}
-        className="relative aspect-video border border-gray-200 rounded-lg bg-gray-100 overflow-hidden mb-4"
+        className="relative aspect-video border border-border rounded-lg bg-gray-100 dark:bg-gray-800 overflow-hidden mb-4"
         onClick={() => onElementSelect(null)} // Deselect when clicking on canvas
       >
         {/* Background Image */}
@@ -487,7 +489,7 @@ export default function ThumbnailEditor({
           variant="outline"
           size="sm"
           className="text-sm flex items-center"
-          onClick={handleUndo}
+          onClick={onUndo}
         >
           <Undo className="h-4 w-4 mr-1" /> Undo
         </Button>

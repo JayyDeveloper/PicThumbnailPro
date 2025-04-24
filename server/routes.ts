@@ -497,20 +497,36 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(401).json({ error: "Unauthorized" });
       }
       
+      console.log(`Save thumbnail request from user ID: ${req.user.id}`);
+      console.log(`User data from request: ${JSON.stringify(req.user)}`);
+      
       // Check if user has enough points to save a thumbnail
       const user = await storage.getUser(req.user.id);
+      console.log(`User from storage: ${JSON.stringify(user)}`);
       
-      // Fix for missing points - set to 1 for new users
-      if (user && (user.points === undefined || user.points === null)) {
-        await storage.updateUser(user.id, { points: 1 });
-        user.points = 1; // Update local variable
+      if (!user) {
+        console.log(`User ${req.user.id} not found in storage!`);
+        return res.status(404).json({ error: "User not found" });
       }
       
-      if (!user || user.points < 1) {
+      console.log(`User points before check: ${JSON.stringify(user.points)}, type: ${typeof user.points}`);
+      
+      // Fix for missing points - set to 1 for new users
+      if (user.points === undefined || user.points === null) {
+        console.log(`Setting default 1 point for user: ${user.id}`);
+        await storage.updateUser(user.id, { points: 1 });
+        user.points = 1; // Update local variable
+        console.log(`Updated user points: ${user.points}`);
+      }
+      
+      console.log(`Final user points: ${user.points}`);
+      
+      if (user.points < 1) {
+        console.log(`Insufficient points for user ${user.id}: ${user.points}`);
         return res.status(403).json({ 
           error: "Insufficient points", 
           pointsRequired: 1,
-          currentPoints: user?.points || 0
+          currentPoints: user.points || 0
         });
       }
 
@@ -563,6 +579,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(401).json({ error: "Unauthorized" });
       }
       
+      console.log(`Export thumbnail request from user ID: ${req.user.id}`);
+      console.log(`User data from request: ${JSON.stringify(req.user)}`);
+      
       const { imageUrl, elements, filters } = req.body;
       
       if (!imageUrl) {
@@ -571,14 +590,27 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       // Check if user has enough points
       const user = await storage.getUser(req.user.id);
+      console.log(`User from storage: ${JSON.stringify(user)}`);
       
-      // Fix for missing points - set to 1 for new users
-      if (user && (user.points === undefined || user.points === null)) {
-        await storage.updateUser(user.id, { points: 1 });
-        user.points = 1; // Update local variable
+      if (!user) {
+        console.log(`User ${req.user.id} not found in storage!`);
+        return res.status(404).json({ error: "User not found" });
       }
       
+      console.log(`User points before check: ${JSON.stringify(user.points)}, type: ${typeof user.points}`);
+      
+      // Fix for missing points - set to 1 for new users
+      if (user.points === undefined || user.points === null) {
+        console.log(`Setting default 1 point for user: ${user.id}`);
+        await storage.updateUser(user.id, { points: 1 });
+        user.points = 1; // Update local variable
+        console.log(`Updated user points: ${user.points}`);
+      }
+      
+      console.log(`Final user points: ${user.points}`);
+      
       if (!user || user.points < 1) {
+        console.log(`Insufficient points for user ${user.id}: ${user.points}`);
         return res.status(403).json({ 
           error: "Insufficient points", 
           pointsRequired: 1,
@@ -610,6 +642,57 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Debug endpoint to check user points (DEVELOPMENT ONLY)
+  app.get("/api/debug/points/:userId", async (req, res) => {
+    try {
+      const userId = parseInt(req.params.userId);
+      if (isNaN(userId)) {
+        return res.status(400).json({ error: "Invalid user ID" });
+      }
+      
+      const user = await storage.getUser(userId);
+      if (!user) {
+        return res.status(404).json({ error: "User not found" });
+      }
+      
+      res.json({ 
+        userId: user.id, 
+        username: user.username,
+        points: user.points,
+        pointsType: typeof user.points
+      });
+    } catch (error) {
+      console.error('Error fetching debug points:', error);
+      res.status(500).json({ error: 'Failed to fetch debug points' });
+    }
+  });
+  
+  // Endpoint to set points for debugging (DEVELOPMENT ONLY)
+  app.post("/api/debug/set-points/:userId", async (req, res) => {
+    try {
+      const userId = parseInt(req.params.userId);
+      const { points } = req.body;
+      
+      if (isNaN(userId) || typeof points !== 'number') {
+        return res.status(400).json({ error: "Invalid user ID or points value" });
+      }
+      
+      const user = await storage.updateUser(userId, { points });
+      if (!user) {
+        return res.status(404).json({ error: "User not found" });
+      }
+      
+      res.json({ 
+        userId: user.id, 
+        username: user.username,
+        points: user.points
+      });
+    } catch (error) {
+      console.error('Error setting debug points:', error);
+      res.status(500).json({ error: 'Failed to set debug points' });
+    }
+  });
+  
   // Serve uploaded files
   app.use("/uploads", (req, res, next) => {
     // Check if the request is for a file in the uploads directory

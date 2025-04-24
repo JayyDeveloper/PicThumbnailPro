@@ -2,8 +2,35 @@ import { QueryClient, QueryFunction } from "@tanstack/react-query";
 
 async function throwIfResNotOk(res: Response) {
   if (!res.ok) {
-    const text = (await res.text()) || res.statusText;
-    throw new Error(`${res.status}: ${text}`);
+    // Try to parse error as JSON first
+    let errorText = res.statusText;
+    
+    try {
+      const contentType = res.headers.get('content-type');
+      if (contentType && contentType.includes('application/json')) {
+        const errorJson = await res.json();
+        if (errorJson.error) {
+          // If we have a structured error message, use it
+          errorText = errorJson.error;
+        }
+      } else {
+        // Otherwise try to get the text
+        errorText = await res.text() || res.statusText;
+      }
+    } catch (e) {
+      // If parsing fails, fallback to status text
+      console.error('Error parsing error response:', e);
+    }
+    
+    // Special handling for insufficient points (403 Forbidden)
+    if (res.status === 403 && (
+      errorText.includes('Insufficient points') || 
+      errorText.toLowerCase().includes('out of points')
+    )) {
+      throw new Error('Insufficient points');
+    }
+    
+    throw new Error(`${res.status}: ${errorText}`);
   }
 }
 

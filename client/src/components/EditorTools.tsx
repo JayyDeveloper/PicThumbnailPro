@@ -5,13 +5,21 @@ import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
 import { Slider } from "@/components/ui/slider";
+import { Switch } from "@/components/ui/switch";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { 
   AlignLeft, 
   AlignCenter, 
   AlignRight, 
   Bold, 
   Italic, 
-  Underline 
+  Underline,
+  Type,
+  Droplet,
+  Palette,
+  RotateCcw,
+  BadgePercent,
+  SlidersHorizontal
 } from "lucide-react";
 import { TextElement, ThumbnailData } from "@/pages/EditorPage";
 

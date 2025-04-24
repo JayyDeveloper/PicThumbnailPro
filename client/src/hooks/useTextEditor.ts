@@ -15,6 +15,28 @@ export interface TextElement {
   bold: boolean;
   italic: boolean;
   underline: boolean;
+  // Advanced text effects
+  textShadow: {
+    enabled: boolean;
+    color: string;
+    blur: number;
+    offsetX: number;
+    offsetY: number;
+  };
+  outline: {
+    enabled: boolean;
+    color: string;
+    width: number;
+  };
+  gradient: {
+    enabled: boolean;
+    startColor: string;
+    endColor: string;
+    direction: 'to-bottom' | 'to-right' | 'to-top' | 'to-left' | 'to-bottom-right' | 'to-top-right';
+  };
+  letterSpacing: number;
+  transform: 'normal' | 'uppercase' | 'lowercase' | 'capitalize';
+  rotateZ: number;
 }
 
 export default function useTextEditor() {
@@ -38,6 +60,28 @@ export default function useTextEditor() {
       bold: true,
       italic: false,
       underline: false,
+      // Advanced text effects with default values
+      textShadow: {
+        enabled: false,
+        color: '#000000',
+        blur: 4,
+        offsetX: 2,
+        offsetY: 2,
+      },
+      outline: {
+        enabled: false,
+        color: '#000000',
+        width: 2,
+      },
+      gradient: {
+        enabled: false,
+        startColor: '#FF5F6D',
+        endColor: '#FFC371',
+        direction: 'to-bottom',
+      },
+      letterSpacing: 0,
+      transform: 'normal',
+      rotateZ: 0,
     };
 
     setElements(prev => [...prev, newElement]);

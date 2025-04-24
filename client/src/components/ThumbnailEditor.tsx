@@ -416,12 +416,28 @@ export default function ThumbnailEditor({
           >
             <h3 
               style={{
-                color: element.color,
+                color: element.gradient?.enabled 
+                  ? 'transparent' 
+                  : element.color,
                 fontSize: `${element.fontSize}px`,
                 fontFamily: element.fontFamily,
                 fontWeight: element.fontWeight,
                 fontStyle: element.italic ? 'italic' : 'normal',
                 textDecoration: element.underline ? 'underline' : 'none',
+                letterSpacing: element.letterSpacing ? `${element.letterSpacing}px` : 'normal',
+                textTransform: element.transform || 'none',
+                transform: element.rotateZ ? `rotateZ(${element.rotateZ}deg)` : 'none',
+                textShadow: element.textShadow?.enabled 
+                  ? `${element.textShadow.offsetX}px ${element.textShadow.offsetY}px ${element.textShadow.blur}px ${element.textShadow.color}` 
+                  : 'none',
+                WebkitTextStroke: element.outline?.enabled
+                  ? `${element.outline.width}px ${element.outline.color}`
+                  : 'none',
+                background: element.gradient?.enabled
+                  ? `linear-gradient(${element.gradient.direction}, ${element.gradient.startColor}, ${element.gradient.endColor})`
+                  : 'none',
+                WebkitBackgroundClip: element.gradient?.enabled ? 'text' : 'none',
+                backgroundClip: element.gradient?.enabled ? 'text' : 'none',
               }}
             >
               {element.content}

@@ -33,8 +33,15 @@ export default function AccountPage() {
   } = useQuery({
     queryKey: ["/api/user/thumbnails"],
     queryFn: async () => {
-      const res = await apiRequest("GET", "/api/user/thumbnails");
-      return await res.json();
+      const response = await apiRequest("GET", "/api/user/thumbnails");
+      const data = await response.json();
+      console.log('Received thumbnails:', data.map((t: any) => ({
+        id: t.id,
+        name: t.name,
+        createdAt: t.createdAt,
+        updatedAt: t.updatedAt
+      })));
+      return data;
     },
     enabled: !!user,
   });
@@ -202,9 +209,6 @@ export default function AccountPage() {
                           </div>
                           <CardContent className="p-3">
                             <h3 className="font-medium truncate">{thumbnail.name}</h3>
-                            <p className="text-xs text-gray-500">
-                              Created: {new Date(thumbnail.createdAt).toLocaleDateString()}
-                            </p>
                           </CardContent>
                         </Card>
                       ))}

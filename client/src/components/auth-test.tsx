@@ -198,8 +198,12 @@ export default function AuthTest() {
             <Input 
               id="points" 
               type="number" 
+              min="0"
               value={points} 
-              onChange={(e) => setPoints(parseInt(e.target.value) || 0)} 
+              onChange={(e) => {
+                const value = parseInt(e.target.value);
+                setPoints(isNaN(value) ? 0 : value);
+              }} 
             />
           </div>
           

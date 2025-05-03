@@ -35,12 +35,6 @@ export default function useTextEditor() {
         color: '#000000',
         width: 2,
       },
-      gradient: {
-        enabled: false,
-        startColor: '#FF5F6D',
-        endColor: '#FFC371',
-        direction: 'to-bottom',
-      },
       letterSpacing: 0,
       transform: 'normal',
       rotateZ: 0,

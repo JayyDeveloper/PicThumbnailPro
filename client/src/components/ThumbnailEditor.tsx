@@ -21,6 +21,8 @@ import { useMutation, useQuery } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
 import { ShareModal } from "@/components/ShareModal";
 import { InsufficientPointsDialog } from "@/components/InsufficientPointsDialog";
+import { Label } from "@/components/ui/label";
+import { Input } from "@/components/ui/input";
 
 // User data type
 interface UserData {
@@ -46,7 +48,8 @@ interface ThumbnailEditorProps {
   onBringToFront: () => void;
   onSendToBack: () => void;
   onReset: () => void;
-  onUndo?: () => void; // Added undo handler prop
+  onUndo?: () => void;
+  onNameUpdate: (name: string) => void;
 }
 
 export default function ThumbnailEditor({
@@ -64,7 +67,8 @@ export default function ThumbnailEditor({
   onBringToFront,
   onSendToBack,
   onReset,
-  onUndo
+  onUndo,
+  onNameUpdate
 }: ThumbnailEditorProps) {
   const { toast } = useToast();
   const editorRef = useRef<HTMLDivElement>(null);
@@ -406,7 +410,20 @@ export default function ThumbnailEditor({
   };
 
   return (
-    <div className="bg-card rounded-lg shadow-sm p-4 mb-6 dark:border dark:border-border">
+    <div className="bg-card rounded-lg shadow-sm p-4 border dark:border-border">
+      <div className="mb-4">
+        <Label className="block text-sm font-medium text-foreground mb-1">
+          Thumbnail Name
+        </Label>
+        <Input
+          type="text"
+          value={thumbnailData.name}
+          onChange={(e) => onNameUpdate(e.target.value)}
+          placeholder="Enter thumbnail name"
+          className="w-full"
+        />
+      </div>
+      
       <div className="flex justify-between items-center mb-4">
         <h2 className="text-lg font-semibold text-foreground">YouTube Thumbnail Editor</h2>
         <div className="text-sm text-muted-foreground">1280 × 720 px</div>
@@ -531,15 +548,7 @@ export default function ThumbnailEditor({
                 WebkitTextStroke: element.outline?.enabled 
                   ? `${element.outline.width}px ${element.outline.color}` 
                   : '0px transparent',
-                color: element.gradient?.enabled ? 'transparent' : element.color,
-                ...(element.gradient?.enabled 
-                  ? {
-                      backgroundImage: `linear-gradient(${element.gradient.direction}, ${element.gradient.startColor}, ${element.gradient.endColor})`,
-                      WebkitBackgroundClip: 'text',
-                      backgroundClip: 'text',
-                    }
-                  : {}
-                ),
+                color: element.color
               }}
             >
               {element.content}
@@ -628,7 +637,7 @@ export default function ThumbnailEditor({
           <Button
             variant="default"
             size="sm"
-            className="text-sm flex items-center bg-secondary hover:bg-green-600"
+            className="text-sm flex items-center bg-blue-600 hover:bg-blue-700"
             onClick={downloadThumbnail}
             disabled={!thumbnailData.imageUrl}
           >

@@ -15,7 +15,8 @@ import { apiRequest, queryClient } from "@/lib/queryClient";
 import { InsufficientPointsDialog } from "@/components/InsufficientPointsDialog";
 import { StickerElement } from "@/hooks/useStickerEditor";
 import { Sparkles } from "lucide-react";
-import { Link, Redirect } from "wouter";
+import { Link, Redirect, useLocation } from "wouter";
+import { Thumbnail } from "@shared/schema";
 
 export interface TextElement {
   id: string;
@@ -123,6 +124,46 @@ export default function EditorPage() {
   const { data: recentThumbnails = [] } = useQuery<any[]>({
     queryKey: ["/api/thumbnails/recent"],
   });
+
+  // Fetch thumbnail by ID if present in URL
+  const [location] = useLocation();
+  const searchParams = new URLSearchParams(window.location.search);
+  const thumbnailId = searchParams.get('id');
+  
+  console.log("Location:", location);
+  console.log("Search params:", window.location.search);
+  console.log("Loading thumbnail with ID:", thumbnailId);
+  
+  const { data: thumbnailToLoad, refetch: refetchThumbnail } = useQuery<Thumbnail>({
+    queryKey: ["/api/thumbnails", thumbnailId],
+    queryFn: async () => {
+      const response = await apiRequest("GET", `/api/thumbnails/${thumbnailId}`);
+      return await response.json();
+    },
+    enabled: !!thumbnailId,
+    // Always fetch fresh data
+    staleTime: 0,
+    refetchOnMount: true,
+    refetchOnWindowFocus: true,
+  });
+
+  // Force a refetch when the component mounts with a thumbnail ID
+  useEffect(() => {
+    if (thumbnailId) {
+      // Add a small delay to ensure the component is mounted
+      const timer = setTimeout(() => {
+        refetchThumbnail();
+      }, 100);
+      return () => clearTimeout(timer);
+    }
+  }, [thumbnailId, refetchThumbnail]);
+
+  useEffect(() => {
+    console.log("Thumbnail data received:", thumbnailToLoad);
+    if (thumbnailToLoad) {
+      handleLoadThumbnail(thumbnailToLoad);
+    }
+  }, [thumbnailToLoad]);
 
   const handleImageSelected = (imageUrl: string) => {
     setCurrentThumbnail({
@@ -282,6 +323,13 @@ export default function EditorPage() {
     toast({
       title: "Reset Complete",
       description: "All elements have been removed, but the image is kept.",
+    });
+  };
+
+  const handleNameUpdate = (name: string) => {
+    setCurrentThumbnail({
+      ...currentThumbnail,
+      name,
     });
   };
   
@@ -469,12 +517,21 @@ export default function EditorPage() {
       return await response.json();
     },
     onSuccess: (data) => {
+      // Update local state with the response data
+      setCurrentThumbnail(data);
+      
+      // Invalidate all relevant queries
+      queryClient.invalidateQueries({ queryKey: ["/api/user/thumbnails"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/user"] });
+      // Invalidate the specific thumbnail query if we have an ID
+      if (data.id) {
+        queryClient.invalidateQueries({ queryKey: ["/api/thumbnails", data.id] });
+      }
+      
       toast({
         title: "Thumbnail Saved",
         description: "Your thumbnail has been saved successfully.",
       });
-      queryClient.invalidateQueries({ queryKey: ["/api/user/thumbnails"] });
-      queryClient.invalidateQueries({ queryKey: ["/api/user"] });
     },
     onError: (error: any) => {
       console.error("Save error:", error);
@@ -580,6 +637,34 @@ export default function EditorPage() {
     exportThumbnailMutation.mutate();
   };
 
+  // Handle loading a saved thumbnail
+  const handleLoadThumbnail = (thumbnail: Thumbnail) => {
+    console.log("Loading thumbnail:", thumbnail);
+    setCurrentThumbnail({
+      id: thumbnail.id,
+      imageUrl: thumbnail.imageUrl,
+      elements: (thumbnail.elements as unknown as TextElement[]) || [],
+      stickers: (thumbnail.stickers as unknown as StickerElement[]) || [],
+      filters: thumbnail.filters as {
+        brightness: number;
+        contrast: number;
+        saturation: number;
+        blur: number;
+        filterName: string | null;
+      },
+      name: thumbnail.name
+    });
+    
+    // Clear selection when loading a new thumbnail
+    setSelectedElement(null);
+    setSelectedSticker(null);
+    
+    toast({
+      title: "Thumbnail Loaded",
+      description: "The thumbnail has been loaded into the editor.",
+    });
+  };
+
   // If user should be redirected to auth page, do it
   if (shouldRedirectToAuth) {
     return <Redirect to="/auth" />;
@@ -630,6 +715,7 @@ export default function EditorPage() {
                   onSendToBack={handleSendToBack}
                   onReset={handleReset}
                   onUndo={handleUndo}
+                  onNameUpdate={handleNameUpdate}
                 />
                 
                 <div className="mt-6">
@@ -667,7 +753,10 @@ export default function EditorPage() {
                 
                 {/* Recent Thumbnails */}
                 <div className="mt-8">
-                  <RecentThumbnails thumbnails={recentThumbnails} />
+                  <RecentThumbnails 
+                    thumbnails={recentThumbnails} 
+                    onThumbnailSelect={handleLoadThumbnail}
+                  />
                 </div>
               </>
             )}

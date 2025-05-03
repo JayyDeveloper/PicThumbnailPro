@@ -1,4 +1,4 @@
-import { pgTable, text, serial, integer, boolean, jsonb } from "drizzle-orm/pg-core";
+import { pgTable, text, serial, integer, boolean, jsonb, timestamp } from "drizzle-orm/pg-core";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
 
@@ -65,6 +65,7 @@ export const thumbnails = pgTable("thumbnails", {
   name: text("name").notNull().default("Untitled Thumbnail"),
   imageUrl: text("image_url").notNull(),
   elements: jsonb("elements").notNull().default([]),
+  stickers: jsonb("stickers").notNull().default([]),
   filters: jsonb("filters").notNull().default({
     brightness: 0,
     contrast: 0,
@@ -73,18 +74,40 @@ export const thumbnails = pgTable("thumbnails", {
     filterName: null,
   }),
   userId: integer("user_id").references(() => users.id),
+  createdAt: text("created_at").notNull().default(new Date().toISOString()),
+  updatedAt: text("updated_at").notNull().default(new Date().toISOString()),
 });
 
 export const insertThumbnailSchema = createInsertSchema(thumbnails).pick({
   name: true,
   imageUrl: true,
   elements: true,
+  stickers: true,
   filters: true,
   userId: true,
+  createdAt: true,
+  updatedAt: true
 });
 
-export type InsertThumbnail = z.infer<typeof insertThumbnailSchema>;
-export type Thumbnail = typeof thumbnails.$inferSelect;
+export type Thumbnail = {
+  id: number;
+  name: string;
+  imageUrl: string;
+  elements: any[];
+  stickers: any[];
+  filters: {
+    brightness: number;
+    contrast: number;
+    saturation: number;
+    blur: number;
+    filterName: string | null;
+  };
+  userId: number | null;
+  createdAt: string;
+  updatedAt: string;
+};
+
+export type InsertThumbnail = Omit<Thumbnail, "id">;
 
 // Point packages
 export const pointPackages = pgTable("point_packages", {

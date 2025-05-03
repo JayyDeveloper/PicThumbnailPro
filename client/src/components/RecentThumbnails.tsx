@@ -1,24 +1,22 @@
 import { useToast } from "@/hooks/use-toast";
+import { Thumbnail } from "@shared/schema";
 
-interface Thumbnail {
-  id: number;
-  name: string;
-  imageUrl: string;
-}
-
-interface RecentThumbnailsProps {
+export interface RecentThumbnailsProps {
   thumbnails: Thumbnail[];
+  onThumbnailSelect?: (thumbnail: Thumbnail) => void;
 }
 
-export default function RecentThumbnails({ thumbnails }: RecentThumbnailsProps) {
+export default function RecentThumbnails({ thumbnails, onThumbnailSelect }: RecentThumbnailsProps) {
   const { toast } = useToast();
   
   const handleThumbnailClick = (thumbnail: Thumbnail) => {
+    if (onThumbnailSelect) {
+      onThumbnailSelect(thumbnail);
+    }
     toast({
       title: "Thumbnail Selected",
       description: `You selected: ${thumbnail.name}`,
     });
-    // This would normally load the thumbnail into the editor
   };
   
   // If no thumbnails, don't show the section

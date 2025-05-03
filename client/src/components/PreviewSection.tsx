@@ -139,15 +139,7 @@ export default function PreviewSection({ thumbnailData }: PreviewSectionProps) {
                     WebkitTextStroke: element.outline?.enabled 
                       ? `${element.outline.width}px ${element.outline.color}` 
                       : '0px transparent',
-                    color: element.gradient?.enabled ? 'transparent' : element.color,
-                    ...(element.gradient?.enabled 
-                      ? {
-                          backgroundImage: `linear-gradient(${element.gradient.direction}, ${element.gradient.startColor}, ${element.gradient.endColor})`,
-                          WebkitBackgroundClip: 'text',
-                          backgroundClip: 'text',
-                        }
-                      : {}
-                    ),
+                    color: element.color
                   }}
                 >
                   {element.content}

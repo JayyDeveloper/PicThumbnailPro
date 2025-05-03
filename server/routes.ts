@@ -490,6 +490,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Get thumbnail by ID
+  app.get("/api/thumbnails/:id", async (req, res) => {
+    try {
+      const thumbnail = await storage.getThumbnail(parseInt(req.params.id));
+      if (!thumbnail) {
+        return res.status(404).json({ error: "Thumbnail not found" });
+      }
+      res.json(thumbnail);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to fetch thumbnail" });
+    }
+  });
+
   // Save thumbnail
   app.post("/api/thumbnails", authenticate, async (req: AuthRequest, res) => {
     try {
@@ -520,9 +533,30 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
       
       console.log(`Final user points: ${user.points}`);
+
+      // First check if this is an update to an existing thumbnail
+      const thumbnailId = req.body.id;
+      if (thumbnailId) {
+        const existingThumbnail = await storage.getThumbnail(thumbnailId);
+        if (existingThumbnail) {
+          // For updates, we want to preserve all fields that aren't explicitly provided
+          const updateData = {
+            ...existingThumbnail,
+            ...req.body,
+            userId: req.user.id,
+            updatedAt: new Date().toISOString()
+          };
+          
+          // Update existing thumbnail without deducting points
+          const thumbnail = await storage.updateThumbnail(thumbnailId, updateData);
+          res.status(200).json(thumbnail);
+          return;
+        }
+      }
       
+      // For new thumbnails, check points and deduct
       if (user.points < 1) {
-        console.log(`Insufficient points for user ${user.id}: ${user.points}`);
+        console.log(`Insufficient points for user ${req.user.id}: ${user.points}`);
         return res.status(403).json({ 
           error: "Insufficient points", 
           pointsRequired: 1,
@@ -530,16 +564,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
         });
       }
 
-      // Validate the request body
+      // Validate the request body for new thumbnails
+      const now = new Date().toISOString();
       const thumbnailData = insertThumbnailSchema.parse({
         ...req.body,
-        userId: req.user.id
+        userId: req.user.id,
+        createdAt: now,
+        updatedAt: now
       });
 
-      // Save to storage
+      // Save new thumbnail to storage
       const thumbnail = await storage.createThumbnail(thumbnailData);
       
-      // Deduct a point and record the transaction
+      // Deduct a point and record the transaction only for new thumbnails
       await storage.updateUserPoints(req.user.id, -1);
       await storage.createPointTransaction({
         userId: req.user.id,
@@ -566,6 +603,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
       
       const thumbnails = await storage.getUserThumbnails(req.user.id);
+      console.log('Sending thumbnails:', thumbnails.map(t => ({
+        id: t.id,
+        name: t.name,
+        createdAt: t.createdAt,
+        updatedAt: t.updatedAt
+      })));
       res.json(thumbnails);
     } catch (error) {
       res.status(500).json({ error: "Failed to fetch user thumbnails" });
@@ -681,7 +724,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         id: user.id,
         username: user.username,
         email: user.email,
-        points: user.points,
+        points: points, // Use the points from the request
         createdAt: user.createdAt,
         stripeCustomerId: user.stripeCustomerId
       };

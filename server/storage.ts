@@ -163,52 +163,6 @@ export class MemStorage implements IStorage {
       this.referenceImages.set(image.id, image);
     });
     
-    // Initialize with some sample thumbnails
-    this.thumbnails.set(1, {
-      id: 1,
-      name: "Gaming Channel",
-      imageUrl: "https://images.unsplash.com/photo-1563986768609-322da13575f3",
-      elements: [],
-      filters: {
-        brightness: 0,
-        contrast: 0,
-        saturation: 0,
-        blur: 0,
-        filterName: null
-      },
-      userId: 1
-    });
-    
-    this.thumbnails.set(2, {
-      id: 2,
-      name: "Social Media Guide",
-      imageUrl: "https://images.unsplash.com/photo-1611162616475-46b635cb6868",
-      elements: [],
-      filters: {
-        brightness: 0,
-        contrast: 0,
-        saturation: 0,
-        blur: 0,
-        filterName: null
-      },
-      userId: 1
-    });
-    
-    this.thumbnails.set(3, {
-      id: 3,
-      name: "My Workspace Tour",
-      imageUrl: "https://images.unsplash.com/photo-1547658719-da2b51169166",
-      elements: [],
-      filters: {
-        brightness: 0,
-        contrast: 0,
-        saturation: 0,
-        blur: 0,
-        filterName: null
-      },
-      userId: 1
-    });
-    
     // Initialize point packages with the specified tiers
     this.pointPackages.set(1, {
       id: 1,
@@ -257,7 +211,7 @@ export class MemStorage implements IStorage {
     const user: User = { 
       ...insertUser, 
       id,
-      points: 1, // Start with 1 free point
+      points: insertUser.points ?? 1, // Use provided points or default to 1
       createdAt: new Date().toISOString(),
       stripeCustomerId: null
     };
@@ -345,14 +299,42 @@ export class MemStorage implements IStorage {
   }
   
   async getUserThumbnails(userId: number): Promise<Thumbnail[]> {
-    return Array.from(this.thumbnails.values())
+    const thumbnails = Array.from(this.thumbnails.values())
       .filter(thumbnail => thumbnail.userId === userId)
       .sort((a, b) => b.id - a.id);
+    console.log('Getting user thumbnails:', thumbnails.map(t => ({
+      id: t.id,
+      name: t.name,
+      createdAt: t.createdAt,
+      updatedAt: t.updatedAt
+    })));
+    return thumbnails;
   }
   
   async createThumbnail(thumbnail: InsertThumbnail): Promise<Thumbnail> {
     const id = this.thumbnailIdCounter++;
-    const newThumbnail: Thumbnail = { ...thumbnail, id };
+    const now = new Date().toISOString();
+    const newThumbnail: Thumbnail = { 
+      ...thumbnail, 
+      id,
+      name: thumbnail.name || "Untitled Thumbnail",
+      userId: thumbnail.userId || null,
+      createdAt: thumbnail.createdAt || now,
+      updatedAt: thumbnail.updatedAt || now,
+      elements: thumbnail.elements || [],
+      stickers: thumbnail.stickers || [],
+      filters: thumbnail.filters || {
+        brightness: 0,
+        contrast: 0,
+        saturation: 0,
+        blur: 0,
+        filterName: null,
+      }
+    };
+    console.log('Creating thumbnail with dates:', {
+      createdAt: newThumbnail.createdAt,
+      updatedAt: newThumbnail.updatedAt
+    });
     this.thumbnails.set(id, newThumbnail);
     return newThumbnail;
   }
@@ -364,7 +346,16 @@ export class MemStorage implements IStorage {
       return undefined;
     }
     
-    const updated: Thumbnail = { ...existing, ...thumbnail };
+    const now = new Date().toISOString();
+    const updated: Thumbnail = { 
+      ...existing, 
+      ...thumbnail,
+      updatedAt: now
+    };
+    console.log('Updating thumbnail with dates:', {
+      createdAt: updated.createdAt,
+      updatedAt: updated.updatedAt
+    });
     this.thumbnails.set(id, updated);
     return updated;
   }
@@ -445,8 +436,12 @@ export class MemStorage implements IStorage {
   async createPointTransaction(transaction: InsertPointTransaction): Promise<PointTransaction> {
     const id = this.pointTransactionIdCounter++;
     const newTransaction: PointTransaction = {
-      ...transaction,
       id,
+      points: transaction.points,
+      userId: transaction.userId,
+      description: transaction.description,
+      packageId: transaction.packageId ?? null,
+      stripePaymentIntentId: transaction.stripePaymentIntentId ?? null,
       createdAt: new Date().toISOString()
     };
     this.pointTransactions.set(id, newTransaction);

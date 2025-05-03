@@ -385,15 +385,12 @@ export default function EditorTools({
           
           {/* Advanced Text Effects */}
           <Tabs defaultValue="shadow" className="w-full mt-4">
-            <TabsList className="grid grid-cols-4 mb-2">
+            <TabsList className="grid grid-cols-3 mb-2">
               <TabsTrigger value="shadow" className="text-xs flex gap-1 items-center">
                 <Droplet className="h-3 w-3" /> Shadow
               </TabsTrigger>
               <TabsTrigger value="outline" className="text-xs flex gap-1 items-center">
                 <Type className="h-3 w-3" /> Outline
-              </TabsTrigger>
-              <TabsTrigger value="gradient" className="text-xs flex gap-1 items-center">
-                <Palette className="h-3 w-3" /> Gradient
               </TabsTrigger>
               <TabsTrigger value="transform" className="text-xs flex gap-1 items-center">
                 <SlidersHorizontal className="h-3 w-3" /> More
@@ -556,115 +553,37 @@ export default function EditorTools({
               )}
             </TabsContent>
             
-            {/* Gradient Tab */}
-            <TabsContent value="gradient" className="space-y-3">
-              <div className="flex items-center justify-between">
-                <Label className="text-sm font-medium text-foreground">Text Gradient</Label>
-                <Switch 
-                  checked={selectedElement.gradient?.enabled || false}
-                  onCheckedChange={(checked) => {
-                    onElementUpdate({
-                      ...selectedElement,
-                      gradient: {
-                        ...(selectedElement.gradient || { startColor: '#FF5F6D', endColor: '#FFC371', direction: 'to-bottom' }),
-                        enabled: checked
-                      }
-                    });
-                  }}
-                />
-              </div>
-              {selectedElement.gradient?.enabled && (
-                <>
-                  <div className="grid grid-cols-2 gap-3">
-                    <div>
-                      <Label className="text-xs">Start Color</Label>
-                      <Input 
-                        type="color" 
-                        value={selectedElement.gradient?.startColor || '#FF5F6D'} 
-                        onChange={(e) => onElementUpdate({
-                          ...selectedElement,
-                          gradient: {
-                            ...selectedElement.gradient!,
-                            startColor: e.target.value
-                          }
-                        })}
-                        className="h-8 w-full p-1 mt-1" 
-                      />
-                    </div>
-                    <div>
-                      <Label className="text-xs">End Color</Label>
-                      <Input 
-                        type="color" 
-                        value={selectedElement.gradient?.endColor || '#FFC371'} 
-                        onChange={(e) => onElementUpdate({
-                          ...selectedElement,
-                          gradient: {
-                            ...selectedElement.gradient!,
-                            endColor: e.target.value
-                          }
-                        })}
-                        className="h-8 w-full p-1 mt-1" 
-                      />
-                    </div>
-                  </div>
-                  <div>
-                    <Label className="text-xs">Direction</Label>
-                    <Select 
-                      value={selectedElement.gradient?.direction || 'to-bottom'}
-                      onValueChange={(value: any) => onElementUpdate({
-                        ...selectedElement,
-                        gradient: {
-                          ...selectedElement.gradient!,
-                          direction: value
-                        }
-                      })}
-                    >
-                      <SelectTrigger className="h-8 mt-1">
-                        <SelectValue placeholder="Select direction" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="to-bottom">Top to Bottom</SelectItem>
-                        <SelectItem value="to-right">Left to Right</SelectItem>
-                        <SelectItem value="to-top">Bottom to Top</SelectItem>
-                        <SelectItem value="to-left">Right to Left</SelectItem>
-                        <SelectItem value="to-bottom-right">Diagonal ↘</SelectItem>
-                        <SelectItem value="to-top-right">Diagonal ↗</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-                </>
-              )}
-            </TabsContent>
-            
             {/* Transform Tab */}
             <TabsContent value="transform" className="space-y-3">
-              <div>
-                <Label className="text-xs">Letter Spacing: {selectedElement.letterSpacing || 0}px</Label>
-                <Slider 
-                  value={[selectedElement.letterSpacing || 0]} 
-                  min={-2} 
-                  max={10} 
-                  step={0.5}
-                  onValueChange={(values) => onElementUpdate({
-                    ...selectedElement,
-                    letterSpacing: values[0]
-                  })}
-                  className="mt-1" 
-                />
-              </div>
-              <div>
-                <Label className="text-xs">Rotation: {selectedElement.rotateZ || 0}°</Label>
-                <Slider 
-                  value={[selectedElement.rotateZ || 0]} 
-                  min={-30} 
-                  max={30} 
-                  step={1}
-                  onValueChange={(values) => onElementUpdate({
-                    ...selectedElement,
-                    rotateZ: values[0]
-                  })}
-                  className="mt-1" 
-                />
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <Label className="text-xs">Letter Spacing: {selectedElement.letterSpacing || 0}px</Label>
+                  <Slider 
+                    value={[selectedElement.letterSpacing || 0]} 
+                    min={-2} 
+                    max={10} 
+                    step={0.5}
+                    onValueChange={(values) => onElementUpdate({
+                      ...selectedElement,
+                      letterSpacing: values[0]
+                    })}
+                    className="mt-1" 
+                  />
+                </div>
+                <div>
+                  <Label className="text-xs">Rotation: {selectedElement.rotateZ || 0}°</Label>
+                  <Slider 
+                    value={[selectedElement.rotateZ || 0]} 
+                    min={-45} 
+                    max={45} 
+                    step={1}
+                    onValueChange={(values) => onElementUpdate({
+                      ...selectedElement,
+                      rotateZ: values[0]
+                    })}
+                    className="mt-1" 
+                  />
+                </div>
               </div>
               <div>
                 <Label className="text-xs">Text Transform</Label>

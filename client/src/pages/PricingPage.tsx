@@ -1,6 +1,8 @@
 import { Link } from "wouter";
 import { Check, Zap } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { useAuth } from "@/hooks/use-auth";
+import { useToast } from "@/hooks/use-toast";
 
 // Pricing tiers with different features and benefits
 const pricingTiers = [
@@ -28,11 +30,11 @@ const pricingTiers = [
       "Advanced editing tools",
       "Priority support",
       "Save & resume projects",
+      "Basic AI image generation",
     ],
     buttonText: "Upgrade Now",
     buttonVariant: "default" as const,
     highlightedFeature: "5 Points",
-    popular: true,
   },
   {
     name: "Platinum",
@@ -45,6 +47,8 @@ const pricingTiers = [
       "Priority support",
       "Save unlimited projects",
       "Custom templates",
+      "Advanced AI image generation",
+      "AI style transfer",
     ],
     buttonText: "Upgrade Now",
     buttonVariant: "default" as const,
@@ -62,14 +66,60 @@ const pricingTiers = [
       "Team collaboration",
       "Custom branding",
       "Analytics integration",
+      "Premium AI image generation",
+      "AI style transfer",
+      "AI background removal",
+      "AI text generation",
     ],
     buttonText: "Upgrade Now",
     buttonVariant: "default" as const,
     highlightedFeature: "50 Points",
+    popular: true,
   },
 ];
 
 export default function PricingPage() {
+  const { user } = useAuth();
+  const { toast } = useToast();
+
+  const handleFreePlanClick = async () => {
+    if (!user) {
+      window.location.href = '/auth';
+      return;
+    }
+
+    try {
+      const response = await fetch('/api/debug/set-points/' + user.id, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${localStorage.getItem('token')}`
+        },
+        body: JSON.stringify({ points: (user.points || 0) + 1 })
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to add point');
+      }
+
+      const data = await response.json();
+      
+      toast({
+        title: 'Point Added',
+        description: `You now have ${data.points} points!`,
+      });
+
+      // Reload the page to update the points display
+      window.location.reload();
+    } catch (error) {
+      toast({
+        title: 'Error',
+        description: 'Failed to add point. Please try again.',
+        variant: 'destructive'
+      });
+    }
+  };
+
   return (
     <div className="container mx-auto py-16 px-4 sm:px-6 lg:px-8">
       <div className="text-center max-w-3xl mx-auto">
@@ -123,15 +173,27 @@ export default function PricingPage() {
               </ul>
             </div>
             <div className="mt-8">
-              <Button
-                variant={tier.buttonVariant}
-                className={`w-full ${
-                  tier.buttonVariant === "default" ? "bg-primary hover:bg-primary/90" : ""
-                }`}
-                asChild
-              >
-                <Link href="/auth">{tier.buttonText}</Link>
-              </Button>
+              {tier.name === "Starter" ? (
+                <Button
+                  variant={tier.buttonVariant}
+                  className={`w-full ${
+                    tier.buttonVariant === "default" ? "bg-primary hover:bg-primary/90" : ""
+                  }`}
+                  onClick={handleFreePlanClick}
+                >
+                  {tier.buttonText}
+                </Button>
+              ) : (
+                <Button
+                  variant={tier.buttonVariant}
+                  className={`w-full ${
+                    tier.buttonVariant === "default" ? "bg-primary hover:bg-primary/90" : ""
+                  }`}
+                  asChild
+                >
+                  <Link href="/auth">{tier.buttonText}</Link>
+                </Button>
+              )}
             </div>
           </div>
         ))}

@@ -15,6 +15,7 @@ import { AuthProvider } from "@/hooks/use-auth";
 import { ThemeProvider } from "@/components/ThemeProvider";
 import { useEffect } from "react";
 import AIGenerationPage from "./pages/AIGenerationPage";
+import AIThumbnailPage from "./pages/AIThumbnailPage";
 
 function TokenSynchronizer() {
   useEffect(() => {
@@ -49,6 +50,7 @@ function Router() {
           <Route path="/" component={Home} />
           <Route path="/editor" component={EditorPage} />
           <Route path="/ai" component={AIGenerationPage} />
+          <Route path="/ai-thumbnail" component={AIThumbnailPage} />
           <Route path="/pricing" component={PricingPage} />
           <Route path="/auth" component={AuthPage} />
           <Route path="/account" component={AccountPage} />

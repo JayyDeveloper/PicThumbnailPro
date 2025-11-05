@@ -18,6 +18,13 @@ import { ZodError } from "zod";
 import { fromZodError } from "zod-validation-error";
 import Stripe from "stripe";
 import { generateImageFromPrompt } from "./imageGenerator";
+import {
+  analyzeImageForThumbnail,
+  generateViralSuggestions,
+  generateThumbnailText,
+  isAIEnabled,
+  getAIServiceStatus
+} from "./aiService";
 
 // Use database storage if available, otherwise fallback to memory storage
 const storage = dbStorage.isConnected() ? dbStorage : memStorage;
@@ -490,11 +497,128 @@ export async function registerRoutes(app: Express): Promise<Server> {
       });
     } catch (error: any) {
       console.error("Error generating image:", error);
-      res.status(500).json({ 
-        error: "Failed to generate image", 
-        message: error?.message || "Unknown error" 
+      res.status(500).json({
+        error: "Failed to generate image",
+        message: error?.message || "Unknown error"
       });
     }
+  });
+
+  // AI-Powered Thumbnail Generation with Viral Suggestions
+  app.post("/api/ai-generate-thumbnail", authenticate, upload.single("file"), async (req: AuthRequest, res) => {
+    try {
+      if (!req.user) {
+        return res.status(401).json({ error: "Unauthorized" });
+      }
+
+      // Check if AI is enabled
+      if (!isAIEnabled()) {
+        return res.status(503).json({
+          error: "AI service not available",
+          message: "OpenAI API key not configured. Set OPENAI_API_KEY in environment variables."
+        });
+      }
+
+      // Validate file upload
+      if (!req.file) {
+        return res.status(400).json({ error: "No image file uploaded" });
+      }
+
+      // Validate prompt
+      const { prompt } = req.body;
+      if (!prompt || typeof prompt !== 'string' || prompt.trim() === '') {
+        return res.status(400).json({ error: "A description/prompt is required" });
+      }
+
+      console.log(`🎨 AI thumbnail generation request from user ${req.user.username}`);
+      console.log(`📝 Prompt: ${prompt}`);
+
+      // Check if user has enough points (AI generation costs 2 tokens)
+      const AI_GENERATION_COST = 2;
+      const user = await storage.getUser(req.user.id);
+
+      if (!user) {
+        return res.status(404).json({ error: "User not found" });
+      }
+
+      if (user.points < AI_GENERATION_COST) {
+        return res.status(403).json({
+          error: "Insufficient points",
+          message: `AI thumbnail generation requires ${AI_GENERATION_COST} tokens. You have ${user.points} tokens.`,
+          pointsRequired: AI_GENERATION_COST,
+          currentPoints: user.points
+        });
+      }
+
+      // Save uploaded image temporarily
+      const timestamp = Date.now();
+      const filename = `ai-upload-${timestamp}.jpg`;
+      const filepath = path.join(uploadsDir, filename);
+
+      await sharp(req.file.buffer)
+        .resize({ width: 1280, height: 720, fit: "cover" })
+        .jpeg({ quality: 90 })
+        .toFile(filepath);
+
+      console.log(`💾 Image saved: ${filename}`);
+
+      // Step 1: Analyze image with AI
+      console.log('🤖 Starting AI analysis...');
+      const imageAnalysis = await analyzeImageForThumbnail(filepath, prompt);
+
+      // Step 2: Generate viral suggestions
+      const suggestions = await generateViralSuggestions(imageAnalysis, prompt);
+
+      // Step 3: Generate thumbnail text overlays
+      const textOverlays = await generateThumbnailText(imageAnalysis, prompt);
+
+      // The enhanced image URL (for now, return the uploaded image)
+      // In a future enhancement, we could apply AI-suggested modifications
+      const enhancedImageUrl = `/uploads/${filename}`;
+
+      // Save reference to the database
+      const image = await storage.addReferenceImage({
+        url: enhancedImageUrl,
+        alt: `AI-generated thumbnail: ${prompt.substring(0, 50)}`,
+        userId: req.user.id,
+        isStock: false
+      });
+
+      // Deduct points and create transaction
+      await storage.updateUserPoints(req.user.id, -AI_GENERATION_COST);
+      await storage.createPointTransaction({
+        userId: req.user.id,
+        points: -AI_GENERATION_COST,
+        description: `AI thumbnail generation: ${prompt.substring(0, 40)}...`
+      });
+
+      console.log(`✅ AI generation complete. ${AI_GENERATION_COST} tokens deducted.`);
+
+      // Return comprehensive response
+      res.json({
+        success: true,
+        enhancedImageUrl,
+        imageId: image.id,
+        analysis: imageAnalysis,
+        suggestions,
+        textOverlays,
+        pointsUsed: AI_GENERATION_COST,
+        remainingPoints: user.points - AI_GENERATION_COST,
+        message: "AI thumbnail generated successfully with viral optimization"
+      });
+    } catch (error: any) {
+      console.error("❌ Error in AI thumbnail generation:", error);
+
+      res.status(500).json({
+        error: "Failed to generate AI thumbnail",
+        message: error?.message || "Unknown error"
+      });
+    }
+  });
+
+  // Get AI service status
+  app.get("/api/ai-status", (req, res) => {
+    res.json(getAIServiceStatus());
   });
 
   // Upload image (temporarily removed authentication for testing)

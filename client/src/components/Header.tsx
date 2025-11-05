@@ -38,14 +38,14 @@ export default function Header() {
         <div className="flex space-x-3">
           <ThemeToggle />
           
-          <Button 
-            size="sm" 
-            className="bg-gradient-to-r from-purple-600 via-pink-600 to-red-600 text-white font-bold hover:opacity-90 transition-opacity" 
+          <Button
+            size="sm"
+            className="bg-gradient-to-r from-purple-600 via-pink-600 to-red-600 text-white font-bold hover:opacity-90 transition-opacity"
             asChild
           >
-            <Link href="/ai">
+            <Link href="/ai-thumbnail">
               <Sparkles className="h-5 w-5 mr-1" />
-              <span>Try AI</span>
+              <span>AI Thumbnail</span>
             </Link>
           </Button>
           

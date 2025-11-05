@@ -2,7 +2,17 @@
 
 ## 🎯 Overview
 
-ThumbnailCraft is a YouTube thumbnail maker application that allows users to create professional thumbnails with AI-powered image generation. New users receive **1 free token** to test the service.
+ThumbnailCraft is a YouTube thumbnail maker application that allows users to create professional thumbnails with AI-powered enhancement and viral optimization. New users receive **1 free token** to test the service.
+
+### 🌟 NEW: AI Thumbnail Generator
+
+Upload your image, describe your video concept, and get:
+- **AI-enhanced thumbnails** with professional suggestions
+- **3 viral video strategies** (Curiosity, Value, Entertainment)
+- **SEO-optimized titles, tags, and descriptions**
+- **Catchy text overlay suggestions**
+
+**Cost:** 2 tokens per generation
 
 ## 🔒 Security Improvements Implemented
 
@@ -88,6 +98,7 @@ The app will start on `http://localhost:5001`
 2. **Token Usage**:
    - Save a thumbnail: **-1 token**
    - Export a thumbnail: **-1 token**
+   - **AI Thumbnail Generation: -2 tokens** 🌟
 3. **Purchasing More Tokens**:
    - Basic Pack: 5 tokens for $4.99
    - Standard Pack: 15 tokens for $9.99
@@ -320,7 +331,105 @@ If points aren't being deducted:
 - **Authentication**: JWT (jsonwebtoken)
 - **Payments**: Stripe
 - **Image Processing**: Sharp
-- **AI**: OpenAI DALL-E 3 (optional)
+- **AI**: OpenAI GPT-4 Vision & GPT-4 (for viral optimization)
+
+## 🤖 AI Thumbnail Generation
+
+### Overview
+
+The AI Thumbnail Generator is a premium feature that uses GPT-4 Vision to analyze your uploaded image and generate viral-worthy YouTube content suggestions.
+
+### How It Works
+
+1. **Upload Image**: User uploads their base thumbnail image
+2. **Describe Video**: User provides a description of their video concept
+3. **AI Analysis**: GPT-4 Vision analyzes the image and suggests enhancements
+4. **Viral Strategies**: AI generates 3 different approaches:
+   - **Curiosity-Driven**: Creates mystery and intrigue
+   - **Value-Driven**: Educational and helpful
+   - **Entertainment-Driven**: Exciting and dramatic
+5. **SEO Optimization**: Each strategy includes:
+   - Click-worthy title (50-70 characters)
+   - 10-15 SEO tags
+   - Engaging video description (150-200 words)
+6. **Text Overlays**: 5 punchy text suggestions for the thumbnail
+
+### Cost & Requirements
+
+- **Cost:** 2 tokens per generation
+- **Requirements:**
+  - OpenAI API key configured (OPENAI_API_KEY)
+  - User must be logged in
+  - Minimum 2 tokens in account
+
+### API Endpoint
+
+```bash
+POST /api/ai-generate-thumbnail
+Authorization: Bearer <jwt-token>
+Content-Type: multipart/form-data
+
+FormData:
+  - file: <image file>
+  - prompt: <video description>
+
+Response:
+{
+  "success": true,
+  "enhancedImageUrl": "/uploads/ai-upload-123.jpg",
+  "analysis": "AI analysis of the image...",
+  "suggestions": [
+    {
+      "title": "Viral Title Here",
+      "tags": ["tag1", "tag2", ...],
+      "description": "Engaging description..."
+    },
+    // ... 2 more suggestions
+  ],
+  "textOverlays": ["TEXT 1", "TEXT 2", ...],
+  "pointsUsed": 2,
+  "remainingPoints": 3
+}
+```
+
+### Frontend Access
+
+Navigate to `/ai-thumbnail` or click the "AI Thumbnail" button in the header.
+
+### Testing
+
+```bash
+# 1. Set OpenAI API key
+export OPENAI_API_KEY=sk-your-key
+
+# 2. Register or login
+# 3. Purchase 2+ tokens or use debug endpoint
+POST /api/debug/set-points/1
+Body: { "points": 10 }
+
+# 4. Visit /ai-thumbnail
+# 5. Upload image and enter prompt
+# 6. Click "Generate AI Thumbnail"
+```
+
+### Error Handling
+
+- **No API Key**: Returns 503 with "AI service not available"
+- **Insufficient Points**: Returns 403 with points required message
+- **No File**: Returns 400 with "No image file uploaded"
+- **No Prompt**: Returns 400 with "A description/prompt is required"
+- **AI Failure**: Falls back to template suggestions
+
+### Features
+
+✅ GPT-4 Vision image analysis
+✅ 3 viral video strategies
+✅ SEO-optimized titles, tags, descriptions
+✅ Text overlay suggestions
+✅ Copy-to-clipboard for all content
+✅ Beautiful, responsive UI
+✅ Real-time point balance tracking
+✅ Fallback suggestions if AI fails
 
 ## 📄 License
 
@@ -337,5 +446,5 @@ MIT
 ---
 
 **Last Updated**: 2025-11-05
-**Version**: 1.0.0
-**Status**: ✅ Core functionality working, ⚠️ Payment flow needs production hardening
+**Version**: 2.0.0
+**Status**: ✅ Core functionality working + AI features, ⚠️ Payment flow needs production hardening

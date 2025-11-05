@@ -270,9 +270,16 @@ export class MemStorage implements IStorage {
   
   async addReferenceImage(image: InsertReferenceImage): Promise<ReferenceImage> {
     const id = this.referenceImageIdCounter++;
-    const newImage: ReferenceImage = { ...image, id };
+    const newImage: ReferenceImage = {
+      id,
+      url: image.url,
+      alt: image.alt ?? "",
+      categoryId: image.categoryId ?? null,
+      userId: image.userId ?? null,
+      isStock: image.isStock ?? false
+    };
     this.referenceImages.set(id, newImage);
-    
+
     // Update category count if categoryId is provided
     if (image.categoryId) {
       const category = this.stockCategories.get(image.categoryId);
@@ -283,7 +290,7 @@ export class MemStorage implements IStorage {
         });
       }
     }
-    
+
     return newImage;
   }
   
@@ -418,7 +425,13 @@ export class MemStorage implements IStorage {
   
   async createPointPackage(pkg: InsertPointPackage): Promise<PointPackage> {
     const id = this.pointPackageIdCounter++;
-    const newPackage: PointPackage = { ...pkg, id };
+    const newPackage: PointPackage = {
+      id,
+      name: pkg.name,
+      points: pkg.points,
+      price: pkg.price,
+      active: pkg.active ?? true
+    };
     this.pointPackages.set(id, newPackage);
     return newPackage;
   }

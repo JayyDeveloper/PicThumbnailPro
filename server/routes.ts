@@ -1,21 +1,35 @@
 import type { Express, Request, Response, NextFunction } from "express";
 import { createServer, type Server } from "http";
-import { storage } from "./storage";
+import { storage as memStorage } from "./storage";
+import { dbStorage } from "./dbStorage";
+import { generateToken, verifyToken, hashPassword, verifyPassword } from "./auth";
 import multer from "multer";
 import path from "path";
 import sharp from "sharp";
 import fs from "fs";
-import { 
-  insertThumbnailSchema, 
-  insertUserSchema, 
-  insertPointTransactionSchema 
+import {
+  insertThumbnailSchema,
+  insertUserSchema,
+  insertPointTransactionSchema,
+  type InsertThumbnail
 } from "@shared/schema";
 import { z } from "zod";
 import { ZodError } from "zod";
 import { fromZodError } from "zod-validation-error";
-import crypto from "crypto";
 import Stripe from "stripe";
 import { generateImageFromPrompt } from "./imageGenerator";
+
+// Use database storage if available, otherwise fallback to memory storage
+const storage = dbStorage.isConnected() ? dbStorage : memStorage;
+
+if (dbStorage.isConnected()) {
+  console.log('✅ Using database storage (PostgreSQL)');
+  // Seed initial data on startup
+  dbStorage.seedInitialData().catch(console.error);
+} else {
+  console.warn('⚠️  Database not connected. Using in-memory storage (data will be lost on restart)');
+  console.warn('⚠️  Set DATABASE_URL environment variable to enable persistent storage');
+}
 
 // Middleware for JWT token-based authentication
 interface AuthRequest extends Request {
@@ -60,77 +74,47 @@ if (!fs.existsSync(uploadsDir)) {
   fs.mkdirSync(uploadsDir, { recursive: true });
 }
 
-// Helper function to hash passwords
-async function hashPassword(password: string): Promise<string> {
-  return new Promise((resolve, reject) => {
-    // Generate random salt
-    const salt = crypto.randomBytes(16).toString('hex');
-    
-    // Hash password with salt
-    crypto.scrypt(password, salt, 64, (err, derivedKey) => {
-      if (err) reject(err);
-      resolve(derivedKey.toString('hex') + '.' + salt);
-    });
-  });
-}
-
-// Helper function to verify passwords
-async function verifyPassword(password: string, hashedPassword: string): Promise<boolean> {
-  return new Promise((resolve, reject) => {
-    const [hash, salt] = hashedPassword.split('.');
-    crypto.scrypt(password, salt, 64, (err, derivedKey) => {
-      if (err) reject(err);
-      resolve(hash === derivedKey.toString('hex'));
-    });
-  });
-}
-
-// Authentication middleware
+// Authentication middleware using JWT
 function authenticate(req: AuthRequest, res: Response, next: NextFunction) {
   const authHeader = req.headers.authorization;
   if (!authHeader || !authHeader.startsWith('Bearer ')) {
     return res.status(401).json({ error: 'Unauthorized' });
   }
-  
+
   const token = authHeader.split(' ')[1];
-  try {
-    // In a real app, you would verify and decode a JWT token
-    // For this demo, we'll use a simplified approach
-    const userId = parseInt(token);
-    
-    if (isNaN(userId)) {
-      return res.status(401).json({ error: 'Invalid token' });
-    }
-    
-    console.log(`Authentication for user ID: ${userId}`);
-    
-    storage.getUser(userId)
-      .then(user => {
-        if (!user) {
-          console.log(`Authentication failed: User not found with ID ${userId}`);
-          return res.status(401).json({ error: 'User not found' });
-        }
-        
-        // Set all user data including points
-        req.user = {
-          id: user.id,  // Make sure ID is set correctly
-          username: user.username,
-          email: user.email,
-          points: user.points ?? 1 // Default to 1 point for new users
-        };
-        
-        // Log user info for debugging
-        console.log(`Authentication successful. User data: ${JSON.stringify(req.user)}`);
-        
-        next();
-      })
-      .catch(error => {
-        console.error('Authentication error:', error);
-        res.status(500).json({ error: 'Authentication failed' });
-      });
-  } catch (error) {
-    res.status(401).json({ error: 'Invalid token' });
+
+  // Verify JWT token
+  const payload = verifyToken(token);
+
+  if (!payload) {
+    return res.status(401).json({ error: 'Invalid or expired token' });
   }
+
+  console.log(`Authentication for user ID: ${payload.userId}`);
+
+  // Fetch fresh user data from storage
+  storage.getUser(payload.userId)
+    .then(user => {
+      if (!user) {
+        console.log(`Authentication failed: User not found with ID ${payload.userId}`);
+        return res.status(401).json({ error: 'User not found' });
+      }
+
+      // Set all user data including points
+      req.user = {
+        id: user.id,
+        username: user.username,
+        email: user.email,
+        points: user.points ?? 1 // Default to 1 point for new users
+      };
+
+      console.log(`Authentication successful. User: ${user.username}`);
+      next();
+    })
+    .catch(error => {
+      console.error('Authentication error:', error);
+      res.status(500).json({ error: 'Authentication failed' });
+    });
 }
 
 export async function registerRoutes(app: Express): Promise<Server> {
@@ -141,32 +125,41 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       // Validate request data
       const userData = insertUserSchema.parse(req.body);
-      
+
       // Check if user already exists
       const existingUser = await storage.getUserByUsername(userData.username);
       if (existingUser) {
         return res.status(409).json({ error: 'Username already taken' });
       }
-      
+
       const existingEmail = await storage.getUserByEmail(userData.email);
       if (existingEmail) {
         return res.status(409).json({ error: 'Email already registered' });
       }
-      
+
       // Hash password
       const hashedPassword = await hashPassword(userData.password);
-      
-      // Create user
+
+      // Create user with 1 free point (default from schema)
       const user = await storage.createUser({
         ...userData,
         password: hashedPassword
       });
-      
+
+      // Generate JWT token
+      const token = generateToken({
+        userId: user.id,
+        username: user.username,
+        email: user.email
+      });
+
       // Return user without password
       const { password, ...userWithoutPassword } = user;
+      console.log(`✅ New user registered: ${user.username} (${user.email}) with ${user.points} free token`);
+
       res.status(201).json({
         user: userWithoutPassword,
-        token: String(user.id) // In a real app, this would be a JWT token
+        token
       });
     } catch (error) {
       if (error instanceof ZodError) {
@@ -182,28 +175,37 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post('/api/auth/login', async (req, res) => {
     try {
       const { username, password } = req.body;
-      
+
       if (!username || !password) {
         return res.status(400).json({ error: 'Username and password are required' });
       }
-      
+
       // Find user
       const user = await storage.getUserByUsername(username);
       if (!user) {
         return res.status(401).json({ error: 'Invalid credentials' });
       }
-      
+
       // Verify password
       const validPassword = await verifyPassword(password, user.password);
       if (!validPassword) {
         return res.status(401).json({ error: 'Invalid credentials' });
       }
-      
+
+      // Generate JWT token
+      const token = generateToken({
+        userId: user.id,
+        username: user.username,
+        email: user.email
+      });
+
       // Return user without password
       const { password: _, ...userWithoutPassword } = user;
+      console.log(`✅ User logged in: ${user.username} (${user.points} tokens available)`);
+
       res.json({
         user: userWithoutPassword,
-        token: String(user.id) // In a real app, this would be a JWT token
+        token
       });
     } catch (error) {
       console.error('Login error:', error);
@@ -302,9 +304,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
         description: `Purchase of ${pointPackage.name}`,
         stripePaymentIntentId: paymentIntentId
       });
-      
-      // Add points to user (in a real app, this would happen after payment confirmation)
+
+      // ⚠️ SECURITY WARNING: Adding points immediately before payment confirmation
+      // TODO: Refactor to only add points after Stripe webhook confirms payment
+      // For now, adding points immediately for demo purposes
       const updatedUser = await storage.updateUserPoints(req.user.id, pointPackage.points);
+      console.warn('⚠️  Points added before payment confirmation - INSECURE for production!');
       
       let clientSecret = null;
       if (stripe && paymentIntentId) {
@@ -322,7 +327,62 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.status(500).json({ error: 'Failed to purchase points' });
     }
   });
-  
+
+  // Stripe webhook handler for payment confirmation
+  app.post('/api/stripe/webhook', async (req, res) => {
+    if (!stripe) {
+      return res.status(400).json({ error: 'Stripe not configured' });
+    }
+
+    const sig = req.headers['stripe-signature'];
+    const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET;
+
+    if (!webhookSecret) {
+      console.error('STRIPE_WEBHOOK_SECRET not configured');
+      return res.status(400).json({ error: 'Webhook secret not configured' });
+    }
+
+    if (!sig) {
+      return res.status(400).json({ error: 'Missing signature' });
+    }
+
+    let event: Stripe.Event;
+
+    try {
+      event = stripe.webhooks.constructEvent(req.body, sig, webhookSecret);
+    } catch (err: any) {
+      console.error('Webhook signature verification failed:', err.message);
+      return res.status(400).json({ error: `Webhook Error: ${err.message}` });
+    }
+
+    // Handle the event
+    if (event.type === 'payment_intent.succeeded') {
+      const paymentIntent = event.data.object as Stripe.PaymentIntent;
+      const { userId, packageId } = paymentIntent.metadata;
+
+      console.log(`✅ Payment succeeded for user ${userId}, package ${packageId}`);
+
+      // In a production app, you would:
+      // 1. Verify the transaction hasn't been processed already
+      // 2. Add the points to the user's account
+      // 3. Update the transaction record
+
+      // For now, just log the event since points are already added
+      // (This needs to be refactored to only add points after webhook confirmation)
+      console.log('Payment confirmed via webhook. Points should be added here, not in purchase endpoint.');
+    } else if (event.type === 'payment_intent.payment_failed') {
+      const paymentIntent = event.data.object as Stripe.PaymentIntent;
+      const { userId } = paymentIntent.metadata;
+
+      console.error(`❌ Payment failed for user ${userId}`);
+
+      // In production, you would handle failed payments here
+      // (e.g., notify user, remove points if already added)
+    }
+
+    res.json({ received: true });
+  });
+
   // Use points to create a thumbnail
   app.post('/api/use-points', authenticate, async (req: AuthRequest, res) => {
     try {
@@ -574,7 +634,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       });
 
       // Save new thumbnail to storage
-      const thumbnail = await storage.createThumbnail(thumbnailData);
+      const thumbnail = await storage.createThumbnail(thumbnailData as InsertThumbnail);
       
       // Deduct a point and record the transaction only for new thumbnails
       await storage.updateUserPoints(req.user.id, -1);
@@ -687,16 +747,21 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   // Debug login endpoint for testing insufficient points (DEVELOPMENT ONLY)
   app.post("/api/debug/login-with-points", async (req, res) => {
+    // Only allow in development mode
+    if (process.env.NODE_ENV === 'production') {
+      return res.status(403).json({ error: 'Debug endpoints are disabled in production' });
+    }
+
     try {
       const { username, points } = req.body;
-      
+
       if (!username || points === undefined) {
         return res.status(400).json({ error: "Username and points are required" });
       }
-      
+
       // Find or create user
       let user = await storage.getUserByUsername(username);
-      
+
       if (!user) {
         // Create a test user if it doesn't exist
         user = await storage.createUser({
@@ -714,11 +779,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
         }
         console.log(`Updated test user ${username} to have ${points} points`);
       }
-      
+
       if (!user) {
         return res.status(500).json({ error: 'Failed to create or update user' });
       }
-      
+
+      // Generate JWT token for debug session
+      const token = generateToken({
+        userId: user.id,
+        username: user.username,
+        email: user.email
+      });
+
       // Create a new object without the password
       const userWithoutPassword = {
         id: user.id,
@@ -728,11 +800,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
         createdAt: user.createdAt,
         stripeCustomerId: user.stripeCustomerId
       };
-      
+
       res.json({
         user: userWithoutPassword,
-        token: String(user.id),
-        message: `Logged in with ${points} points`
+        token,
+        message: `Logged in with ${points} points (DEBUG MODE)`
       });
     } catch (error) {
       console.error('Debug login error:', error);
@@ -742,19 +814,24 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   // Debug endpoint to check user points (DEVELOPMENT ONLY)
   app.get("/api/debug/points/:userId", async (req, res) => {
+    // Only allow in development mode
+    if (process.env.NODE_ENV === 'production') {
+      return res.status(403).json({ error: 'Debug endpoints are disabled in production' });
+    }
+
     try {
       const userId = parseInt(req.params.userId);
       if (isNaN(userId)) {
         return res.status(400).json({ error: "Invalid user ID" });
       }
-      
+
       const user = await storage.getUser(userId);
       if (!user) {
         return res.status(404).json({ error: "User not found" });
       }
-      
-      res.json({ 
-        userId: user.id, 
+
+      res.json({
+        userId: user.id,
         username: user.username,
         points: user.points,
         pointsType: typeof user.points
@@ -767,21 +844,26 @@ export async function registerRoutes(app: Express): Promise<Server> {
   
   // Endpoint to set points for debugging (DEVELOPMENT ONLY)
   app.post("/api/debug/set-points/:userId", async (req, res) => {
+    // Only allow in development mode
+    if (process.env.NODE_ENV === 'production') {
+      return res.status(403).json({ error: 'Debug endpoints are disabled in production' });
+    }
+
     try {
       const userId = parseInt(req.params.userId);
       const { points } = req.body;
-      
+
       if (isNaN(userId) || typeof points !== 'number') {
         return res.status(400).json({ error: "Invalid user ID or points value" });
       }
-      
+
       const user = await storage.updateUser(userId, { points });
       if (!user) {
         return res.status(404).json({ error: "User not found" });
       }
-      
-      res.json({ 
-        userId: user.id, 
+
+      res.json({
+        userId: user.id,
         username: user.username,
         points: user.points
       });

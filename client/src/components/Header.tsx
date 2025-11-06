@@ -1,10 +1,9 @@
 import { Link } from "wouter";
 import { Button } from "@/components/ui/button";
-import { 
-  HelpCircle, 
-  Crown, 
-  Film, 
-  User, 
+import {
+  Crown,
+  Film,
+  User,
   LogIn,
   Sparkles
 } from "lucide-react";
@@ -27,64 +26,72 @@ export default function Header() {
   };
 
   return (
-    <header className="bg-background border-b">
+    <header className="bg-background/95 backdrop-blur-sm border-b border-border/50 sticky top-0 z-50 shadow-soft">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex justify-between items-center">
         <Link href="/">
-          <div className="flex items-center space-x-2 cursor-pointer">
-            <Film className="h-6 w-6 text-primary" />
-            <h1 className="text-xl font-semibold text-foreground">ThumbnailCraft</h1>
+          <div className="flex items-center space-x-2 cursor-pointer group">
+            <div className="gradient-primary p-2 rounded-modern shadow-soft group-hover:shadow-medium transition-all duration-300">
+              <Film className="h-5 w-5 text-white" />
+            </div>
+            <h1 className="text-xl font-bold text-gradient">ThumbnailCraft</h1>
           </div>
         </Link>
-        <div className="flex space-x-3">
+
+        <div className="flex items-center space-x-3">
           <ThemeToggle />
-          
+
           <Button
             size="sm"
-            className="bg-gradient-to-r from-purple-600 via-pink-600 to-red-600 text-white font-bold hover:opacity-90 transition-opacity"
+            className="btn-gradient-primary hidden sm:inline-flex"
             asChild
           >
             <Link href="/ai-thumbnail">
-              <Sparkles className="h-5 w-5 mr-1" />
-              <span>AI Thumbnail</span>
+              <Sparkles className="h-4 w-4 mr-1.5" />
+              <span>AI Generator</span>
             </Link>
           </Button>
-          
+
           {user ? (
             <>
-              <Button size="sm" className="bg-primary hover:bg-blue-600 text-white" asChild>
+              <Button
+                size="sm"
+                variant="outline"
+                className="rounded-modern hover-lift hidden md:inline-flex"
+                asChild
+              >
                 <Link href="/pricing">
-                  <Crown className="h-5 w-5 mr-1" />
+                  <Crown className="h-4 w-4 mr-1.5" />
                   <span>Upgrade</span>
                 </Link>
               </Button>
-              
+
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                  <Button variant="outline" size="sm" className="ml-2">
-                    <div className="flex items-center">
-                      <Avatar className="h-6 w-6 mr-2">
-                        <AvatarFallback className="bg-primary/10 text-primary text-xs">
+                  <Button variant="outline" size="sm" className="rounded-modern hover-lift">
+                    <div className="flex items-center gap-2">
+                      <Avatar className="h-7 w-7">
+                        <AvatarFallback className="gradient-primary text-white text-xs font-semibold">
                           {user.username.substring(0, 2).toUpperCase()}
                         </AvatarFallback>
                       </Avatar>
-                      {user.points > 0 && (
-                        <span className="text-sm font-medium flex items-center mr-1">
-                          <Sparkles className="h-4 w-4 text-yellow-500 mr-1" />
-                          {user.points}
-                        </span>
+                      {user.points !== undefined && (
+                        <div className="flex items-center gap-1 badge-gradient-accent">
+                          <Sparkles className="h-3 w-3" />
+                          <span className="font-semibold">{user.points}</span>
+                        </div>
                       )}
                     </div>
                   </Button>
                 </DropdownMenuTrigger>
-                <DropdownMenuContent align="end">
+                <DropdownMenuContent align="end" className="rounded-modern">
                   <DropdownMenuItem asChild>
-                    <Link href="/account">
+                    <Link href="/account" className="cursor-pointer">
                       <User className="mr-2 h-4 w-4" />
                       <span>My Account</span>
                     </Link>
                   </DropdownMenuItem>
                   <DropdownMenuSeparator />
-                  <DropdownMenuItem onClick={handleLogout} className="text-red-600">
+                  <DropdownMenuItem onClick={handleLogout} className="text-red-600 cursor-pointer">
                     <LogIn className="mr-2 h-4 w-4" />
                     <span>Log out</span>
                   </DropdownMenuItem>
@@ -92,9 +99,13 @@ export default function Header() {
               </DropdownMenu>
             </>
           ) : (
-            <Button size="sm" className="bg-primary hover:bg-blue-600 text-white" asChild>
+            <Button
+              size="sm"
+              className="btn-gradient-primary"
+              asChild
+            >
               <Link href="/auth">
-                <LogIn className="h-5 w-5 mr-1" />
+                <LogIn className="h-4 w-4 mr-1.5" />
                 <span>Sign In</span>
               </Link>
             </Button>

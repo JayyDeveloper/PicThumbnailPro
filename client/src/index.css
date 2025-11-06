@@ -2,6 +2,10 @@
 @tailwind components;
 @tailwind utilities;
 
+/* ============================================
+   MODERN DESIGN SYSTEM - Inspired by Stripe & Apple
+   ============================================ */
+
 /* Custom styles for text elements */
 .text-overlay {
   cursor: move;
@@ -26,49 +30,50 @@
 }
 
 :root {
-      --background: 0 0% 100%;
---foreground: 20 14.3% 4.1%;
---muted: 60 4.8% 95.9%;
---muted-foreground: 25 5.3% 44.7%;
---popover: 0 0% 100%;
---popover-foreground: 20 14.3% 4.1%;
---card: 0 0% 100%;
---card-foreground: 20 14.3% 4.1%;
---border: 20 5.9% 90%;
---input: 20 5.9% 90%;
---primary: 207 90% 54%;
---primary-foreground: 211 100% 99%;
---secondary: 60 4.8% 95.9%;
---secondary-foreground: 24 9.8% 10%;
---accent: 60 4.8% 95.9%;
---accent-foreground: 24 9.8% 10%;
---destructive: 0 84.2% 60.2%;
---destructive-foreground: 60 9.1% 97.8%;
---ring: 20 14.3% 4.1%;
---radius: 0.5rem;
-  }
-  .dark {
-      --background: 240 10% 3.9%;
---foreground: 0 0% 98%;
---muted: 240 3.7% 15.9%;
---muted-foreground: 240 5% 64.9%;
---popover: 240 10% 3.9%;
---popover-foreground: 0 0% 98%;
---card: 240 10% 3.9%;
---card-foreground: 0 0% 98%;
---border: 240 3.7% 15.9%;
---input: 240 3.7% 15.9%;
---primary: 207 90% 54%;
---primary-foreground: 211 100% 99%;
---secondary: 240 3.7% 15.9%;
---secondary-foreground: 0 0% 98%;
---accent: 240 3.7% 15.9%;
---accent-foreground: 0 0% 98%;
---destructive: 0 62.8% 30.6%;
---destructive-foreground: 0 0% 98%;
---ring: 240 4.9% 83.9%;
---radius: 0.5rem;
-  }
+  --background: 0 0% 100%;
+  --foreground: 20 14.3% 4.1%;
+  --muted: 60 4.8% 95.9%;
+  --muted-foreground: 25 5.3% 44.7%;
+  --popover: 0 0% 100%;
+  --popover-foreground: 20 14.3% 4.1%;
+  --card: 0 0% 100%;
+  --card-foreground: 20 14.3% 4.1%;
+  --border: 20 5.9% 90%;
+  --input: 20 5.9% 90%;
+  --primary: 207 90% 54%;
+  --primary-foreground: 211 100% 99%;
+  --secondary: 60 4.8% 95.9%;
+  --secondary-foreground: 24 9.8% 10%;
+  --accent: 60 4.8% 95.9%;
+  --accent-foreground: 24 9.8% 10%;
+  --destructive: 0 84.2% 60.2%;
+  --destructive-foreground: 60 9.1% 97.8%;
+  --ring: 20 14.3% 4.1%;
+  --radius: 0.75rem;
+}
+
+.dark {
+  --background: 240 10% 3.9%;
+  --foreground: 0 0% 98%;
+  --muted: 240 3.7% 15.9%;
+  --muted-foreground: 240 5% 64.9%;
+  --popover: 240 10% 3.9%;
+  --popover-foreground: 0 0% 98%;
+  --card: 240 10% 3.9%;
+  --card-foreground: 0 0% 98%;
+  --border: 240 3.7% 15.9%;
+  --input: 240 3.7% 15.9%;
+  --primary: 207 90% 54%;
+  --primary-foreground: 211 100% 99%;
+  --secondary: 240 3.7% 15.9%;
+  --secondary-foreground: 0 0% 98%;
+  --accent: 240 3.7% 15.9%;
+  --accent-foreground: 0 0% 98%;
+  --destructive: 0 62.8% 30.6%;
+  --destructive-foreground: 0 0% 98%;
+  --ring: 240 4.9% 83.9%;
+  --radius: 0.75rem;
+}
 
 @layer base {
   * {
@@ -78,46 +83,275 @@
   body {
     @apply font-sans antialiased bg-background text-foreground;
   }
-  
+
   /* Font styling for the select dropdown */
   [data-font="Montserrat"] {
     font-family: 'Montserrat', sans-serif;
   }
-  
+
   [data-font="Roboto"] {
     font-family: 'Roboto', sans-serif;
   }
-  
+
   [data-font="Open Sans"] {
     font-family: 'Open Sans', sans-serif;
   }
-  
+
   [data-font="Oswald"] {
     font-family: 'Oswald', sans-serif;
   }
-  
+
   [data-font="Poppins"] {
     font-family: 'Poppins', sans-serif;
   }
-  
+
   [data-font="Raleway"] {
     font-family: 'Raleway', sans-serif;
   }
-  
+
   [data-font="Anton"] {
     font-family: 'Anton', sans-serif;
   }
-  
+
   [data-font="Bebas Neue"] {
     font-family: 'Bebas Neue', cursive;
   }
-  
+
   [data-font="Bungee"] {
     font-family: 'Bungee', cursive;
   }
-  
+
   [data-font="Staatliches"] {
     font-family: 'Staatliches', cursive;
   }
 }
 
+@layer utilities {
+  /* ============================================
+     MODERN GRADIENT BACKGROUNDS
+     ============================================ */
+
+  /* Primary Brand Gradient (Blue to Purple - Stripe inspired) */
+  .gradient-primary {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  }
+
+  /* Accent Gradient (Pink to Orange) */
+  .gradient-accent {
+    background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+  }
+
+  /* Success Gradient (Green to Teal) */
+  .gradient-success {
+    background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+  }
+
+  /* Premium Gradient (Gold to Orange) */
+  .gradient-premium {
+    background: linear-gradient(135deg, #ffd89b 0%, #19547b 100%);
+  }
+
+  /* Aurora Gradient (Multi-color) */
+  .gradient-aurora {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 25%, #f093fb 50%, #4facfe 75%, #00f2fe 100%);
+  }
+
+  /* Mesh Gradients for Backgrounds */
+  .gradient-mesh-1 {
+    background:
+      radial-gradient(at 40% 20%, hsla(28,100%,74%,0.15) 0px, transparent 50%),
+      radial-gradient(at 80% 0%, hsla(189,100%,56%,0.15) 0px, transparent 50%),
+      radial-gradient(at 0% 50%, hsla(355,100%,93%,0.15) 0px, transparent 50%),
+      radial-gradient(at 80% 50%, hsla(340,100%,76%,0.15) 0px, transparent 50%),
+      radial-gradient(at 0% 100%, hsla(22,100%,77%,0.15) 0px, transparent 50%),
+      radial-gradient(at 80% 100%, hsla(242,100%,70%,0.15) 0px, transparent 50%),
+      radial-gradient(at 0% 0%, hsla(343,100%,76%,0.15) 0px, transparent 50%);
+  }
+
+  .gradient-mesh-2 {
+    background:
+      radial-gradient(at 0% 0%, hsla(253,100%,77%,0.2) 0px, transparent 50%),
+      radial-gradient(at 50% 0%, hsla(225,100%,72%,0.2) 0px, transparent 50%),
+      radial-gradient(at 100% 0%, hsla(339,100%,76%,0.2) 0px, transparent 50%),
+      radial-gradient(at 0% 50%, hsla(189,100%,56%,0.2) 0px, transparent 50%),
+      radial-gradient(at 100% 100%, hsla(355,100%,93%,0.2) 0px, transparent 50%);
+  }
+
+  /* ============================================
+     GLASS MORPHISM
+     ============================================ */
+
+  .glass {
+    background: rgba(255, 255, 255, 0.7);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.18);
+  }
+
+  .glass-dark {
+    background: rgba(0, 0, 0, 0.3);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+  }
+
+  /* ============================================
+     MODERN SHADOWS
+     ============================================ */
+
+  .shadow-soft {
+    box-shadow: 0 2px 15px -3px rgba(0, 0, 0, 0.07), 0 10px 20px -2px rgba(0, 0, 0, 0.04);
+  }
+
+  .shadow-medium {
+    box-shadow: 0 4px 20px -2px rgba(0, 0, 0, 0.1), 0 12px 24px -4px rgba(0, 0, 0, 0.08);
+  }
+
+  .shadow-strong {
+    box-shadow: 0 8px 30px -4px rgba(0, 0, 0, 0.15), 0 20px 40px -8px rgba(0, 0, 0, 0.12);
+  }
+
+  .shadow-glow {
+    box-shadow: 0 0 20px rgba(102, 126, 234, 0.4), 0 0 40px rgba(118, 75, 162, 0.2);
+  }
+
+  /* ============================================
+     BORDER RADIUS SYSTEM
+     ============================================ */
+
+  .rounded-modern {
+    border-radius: 12px;
+  }
+
+  .rounded-modern-lg {
+    border-radius: 16px;
+  }
+
+  .rounded-modern-xl {
+    border-radius: 24px;
+  }
+
+  .rounded-modern-2xl {
+    border-radius: 32px;
+  }
+
+  /* ============================================
+     MODERN BUTTON STYLES
+     ============================================ */
+
+  .btn-gradient {
+    @apply rounded-modern font-semibold transition-all duration-300 shadow-soft hover:shadow-medium hover:scale-[1.02] active:scale-[0.98];
+  }
+
+  .btn-gradient-primary {
+    @apply btn-gradient gradient-primary text-white;
+  }
+
+  .btn-gradient-accent {
+    @apply btn-gradient gradient-accent text-white;
+  }
+
+  /* ============================================
+     MODERN CARD STYLES
+     ============================================ */
+
+  .card-modern {
+    @apply bg-card rounded-modern-lg shadow-soft border border-border/50 transition-all duration-300 hover:shadow-medium hover:border-border;
+  }
+
+  .card-gradient {
+    @apply card-modern relative overflow-hidden;
+  }
+
+  .card-gradient::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+  }
+
+  /* ============================================
+     ANIMATED GRADIENTS
+     ============================================ */
+
+  .gradient-animate {
+    background-size: 200% 200%;
+    animation: gradient-shift 6s ease infinite;
+  }
+
+  @keyframes gradient-shift {
+    0% {
+      background-position: 0% 50%;
+    }
+    50% {
+      background-position: 100% 50%;
+    }
+    100% {
+      background-position: 0% 50%;
+    }
+  }
+
+  /* ============================================
+     TEXT GRADIENTS
+     ============================================ */
+
+  .text-gradient {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  .text-gradient-accent {
+    background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  .text-gradient-aurora {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 25%, #f093fb 50%, #4facfe 75%, #00f2fe 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  /* ============================================
+     HOVER EFFECTS
+     ============================================ */
+
+  .hover-lift {
+    @apply transition-all duration-300 hover:-translate-y-1 hover:shadow-medium;
+  }
+
+  .hover-glow {
+    @apply transition-all duration-300 hover:shadow-glow;
+  }
+
+  /* ============================================
+     MODERN INPUTS
+     ============================================ */
+
+  .input-modern {
+    @apply rounded-modern border-border/50 bg-background px-4 py-3 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all duration-200;
+  }
+
+  /* ============================================
+     BADGES
+     ============================================ */
+
+  .badge-gradient {
+    @apply rounded-full px-3 py-1 text-sm font-medium shadow-soft;
+  }
+
+  .badge-gradient-primary {
+    @apply badge-gradient gradient-primary text-white;
+  }
+
+  .badge-gradient-accent {
+    @apply badge-gradient gradient-accent text-white;
+  }
+}

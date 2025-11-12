@@ -27,20 +27,22 @@ export default function Header() {
   };
 
   return (
-    <header className="bg-background border-b">
+    <header className="sticky top-0 z-50 bg-background/80 backdrop-blur-xl border-b border-border/50 shadow-sm">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex justify-between items-center">
         <Link href="/">
-          <div className="flex items-center space-x-2 cursor-pointer">
-            <Film className="h-6 w-6 text-primary" />
-            <h1 className="text-xl font-semibold text-foreground">ThumbnailCraft</h1>
+          <div className="flex items-center space-x-2 cursor-pointer group">
+            <div className="p-2 bg-gradient-to-br from-blue-500 to-purple-500 rounded-xl shadow-md group-hover:shadow-lg transition-all">
+              <Film className="h-5 w-5 text-white" />
+            </div>
+            <h1 className="text-xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 text-transparent bg-clip-text">ThumbnailCraft</h1>
           </div>
         </Link>
         <div className="flex space-x-3">
           <ThemeToggle />
-          
-          <Button 
-            size="sm" 
-            className="bg-gradient-to-r from-purple-600 via-pink-600 to-red-600 text-white font-bold hover:opacity-90 transition-opacity" 
+
+          <Button
+            size="sm"
+            className="bg-gradient-to-r from-purple-600 via-pink-600 to-red-600 text-white font-bold hover:opacity-90 transition-opacity rounded-xl shadow-md hover:shadow-lg"
             asChild
           >
             <Link href="/ai">
@@ -51,19 +53,19 @@ export default function Header() {
           
           {user ? (
             <>
-              <Button size="sm" className="bg-primary hover:bg-blue-600 text-white" asChild>
+              <Button size="sm" className="bg-gradient-to-r from-amber-500 to-yellow-500 hover:from-amber-600 hover:to-yellow-600 text-white rounded-xl shadow-md hover:shadow-lg font-semibold" asChild>
                 <Link href="/pricing">
                   <Crown className="h-5 w-5 mr-1" />
                   <span>Upgrade</span>
                 </Link>
               </Button>
-              
+
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                  <Button variant="outline" size="sm" className="ml-2">
+                  <Button variant="outline" size="sm" className="ml-2 rounded-xl border-2">
                     <div className="flex items-center">
                       <Avatar className="h-6 w-6 mr-2">
-                        <AvatarFallback className="bg-primary/10 text-primary text-xs">
+                        <AvatarFallback className="bg-gradient-to-br from-blue-500 to-purple-500 text-white text-xs font-semibold">
                           {user.username.substring(0, 2).toUpperCase()}
                         </AvatarFallback>
                       </Avatar>
@@ -76,7 +78,7 @@ export default function Header() {
                     </div>
                   </Button>
                 </DropdownMenuTrigger>
-                <DropdownMenuContent align="end">
+                <DropdownMenuContent align="end" className="rounded-xl">
                   <DropdownMenuItem asChild>
                     <Link href="/account">
                       <User className="mr-2 h-4 w-4" />
@@ -92,7 +94,7 @@ export default function Header() {
               </DropdownMenu>
             </>
           ) : (
-            <Button size="sm" className="bg-primary hover:bg-blue-600 text-white" asChild>
+            <Button size="sm" className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white rounded-xl shadow-md hover:shadow-lg font-semibold" asChild>
               <Link href="/auth">
                 <LogIn className="h-5 w-5 mr-1" />
                 <span>Sign In</span>

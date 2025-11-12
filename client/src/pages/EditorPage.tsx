@@ -129,10 +129,12 @@ export default function EditorPage() {
   const [location] = useLocation();
   const searchParams = new URLSearchParams(window.location.search);
   const thumbnailId = searchParams.get('id');
-  
+  const imageUrlParam = searchParams.get('imageUrl');
+
   console.log("Location:", location);
   console.log("Search params:", window.location.search);
   console.log("Loading thumbnail with ID:", thumbnailId);
+  console.log("Image URL from params:", imageUrlParam);
   
   const { data: thumbnailToLoad, refetch: refetchThumbnail } = useQuery<Thumbnail>({
     queryKey: ["/api/thumbnails", thumbnailId],
@@ -164,6 +166,21 @@ export default function EditorPage() {
       handleLoadThumbnail(thumbnailToLoad);
     }
   }, [thumbnailToLoad]);
+
+  // Load image from URL parameter if present
+  useEffect(() => {
+    if (imageUrlParam && !thumbnailId) {
+      console.log("Loading image from URL parameter:", imageUrlParam);
+      setCurrentThumbnail({
+        ...currentThumbnail,
+        imageUrl: imageUrlParam,
+      });
+      toast({
+        title: "Image Loaded",
+        description: "Your generated thumbnail is ready to edit!",
+      });
+    }
+  }, [imageUrlParam, thumbnailId]);
 
   const handleImageSelected = (imageUrl: string) => {
     setCurrentThumbnail({

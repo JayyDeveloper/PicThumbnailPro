@@ -16,6 +16,7 @@ import { fromZodError } from "zod-validation-error";
 import crypto from "crypto";
 import Stripe from "stripe";
 import { generateImageFromPrompt } from "./imageGenerator";
+import { generateThumbnail } from "./thumbnailGenerator";
 
 // Middleware for JWT token-based authentication
 interface AuthRequest extends Request {
@@ -477,6 +478,52 @@ export async function registerRoutes(app: Express): Promise<Server> {
       });
     } catch (error) {
       res.status(500).json({ error: "Failed to upload image" });
+    }
+  });
+
+  // Generate AI thumbnail with image upload and text
+  app.post("/api/generate-thumbnail", upload.single("image"), async (req: any, res) => {
+    try {
+      const { text, useAI } = req.body;
+      const imageBuffer = req.file ? req.file.buffer : null;
+      const shouldUseAI = useAI === 'true' || useAI === true;
+
+      if (!text && !imageBuffer) {
+        return res.status(400).json({
+          error: "Missing input",
+          message: "Please provide either an image, text, or both"
+        });
+      }
+
+      console.log("Generating thumbnail with AI:", shouldUseAI, "Text:", text?.substring(0, 50));
+
+      // Generate the thumbnail using Sharp (and DALL-E if useAI is true and no image provided)
+      const thumbnailUrl = await generateThumbnail(imageBuffer, text || "", shouldUseAI);
+
+      // For testing, use a default user ID
+      const userId = req.user?.id || 1;
+
+      // Save reference to the database
+      const image = await storage.addReferenceImage({
+        url: thumbnailUrl,
+        alt: `AI Generated Thumbnail${text ? `: ${text.substring(0, 50)}` : ""}`,
+        userId: userId,
+        isStock: false
+      });
+
+      res.json({
+        url: thumbnailUrl,
+        id: image.id,
+        alt: image.alt,
+        success: true,
+        message: "High-quality YouTube thumbnail generated successfully"
+      });
+    } catch (error: any) {
+      console.error("Error generating thumbnail:", error);
+      res.status(500).json({
+        error: "Failed to generate thumbnail",
+        message: error?.message || "Unknown error"
+      });
     }
   });
 
